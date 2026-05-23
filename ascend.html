@@ -176,6 +176,20 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .exo-prev { font-size:10px; padding:0 12px 10px 54px; letter-spacing:0.03em; color:var(--ink-faint); }
 .exo-prev .up { color:var(--ok); } .exo-prev .down { color:var(--amber); } .exo-prev .same { color:var(--ink-dim); }
 
+/* EXERCISE VISUAL (schema + demo button) */
+.exo-viz { padding:0 12px 12px 54px; display:flex; gap:10px; align-items:center; }
+.exo-viz-svg { width:72px; height:56px; flex-shrink:0; background:var(--bg-3); border:1px solid var(--border); }
+.exo-demo-btn { flex:1; display:flex; align-items:center; gap:8px; padding:9px 12px; background:var(--bg-3); border:1px solid var(--border-bright); color:var(--ink); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all 0.15s; }
+.exo-demo-btn:hover { border-color:var(--accent-dim); color:var(--accent); }
+.exo-demo-btn .play { font-size:13px; color:var(--accent); }
+.viz-stroke { stroke:var(--accent); fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+.viz-body { stroke:var(--ink-dim); fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.viz-weight { fill:var(--magenta); }
+.viz-anim { animation: vizmove 2.2s ease-in-out infinite; }
+@keyframes vizmove { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
+.viz-anim-down { animation: vizmovedown 2.2s ease-in-out infinite; }
+@keyframes vizmovedown { 0%,100%{transform:translateY(0);} 50%{transform:translateY(7px);} }
+
 /* SET ROWS */
 .sets { padding:0 12px 12px 12px; }
 .set-head { display:grid; grid-template-columns:24px 1fr 1fr 26px; gap:8px; padding:0 4px 6px; font-size:8px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); }
@@ -377,17 +391,28 @@ input:focus { outline:none; }
 // >>> NUMÉRO DE VERSION <<<
 // À INCRÉMENTER À CHAQUE FOIS QUE TU DÉPLOIES UNE NOUVELLE VERSION SUR GITHUB.
 // L'app compare ce numéro à celui de version.json et propose la mise à jour.
-const APP_VERSION = 7;
+const APP_VERSION = 8;
 
-const START_DATE = new Date(2026, 4, 18); // Lundi 18 mai 2026
 const TOTAL_DAYS = 42;
 const STORE_PREFIX = 'ascend_v1_';
 
-// Schedule commun : entraînement un jour sur deux, mercredi TOUJOURS off
-// 0=Lun 1=Mar 2=Mer 3=Jeu 4=Ven 5=Sam 6=Dim
-// Train: Lun, Jeu, Sam | Rest: Mar, Ven, Dim | Off: Mer
-const DAY_TYPE = ['train', 'rest', 'off', 'train', 'rest', 'train', 'rest'];
-const DAYS_FR = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
+// Le planning est piloté par le JOUR DE LA SEMAINE réel (détecté par l'app).
+// JS getDay(): 0=Dim 1=Lun 2=Mar 3=Mer 4=Jeu 5=Ven 6=Sam
+// Sport : Lundi, Jeudi, Samedi · Repos total : Mercredi · Étirements : Mar, Ven, Dim
+// Index par jour JS (0=Dim ... 6=Sam) :
+const DAY_TYPE_BY_WEEKDAY = {
+  0: 'stretch', // Dimanche
+  1: 'train',   // Lundi
+  2: 'stretch', // Mardi
+  3: 'off',     // Mercredi (repos total)
+  4: 'train',   // Jeudi
+  5: 'stretch', // Vendredi
+  6: 'train'    // Samedi
+};
+// Noms de jours indexés par getDay() JS (0=Dim)
+const WEEKDAY_FR = ['DIM','LUN','MAR','MER','JEU','VEN','SAM'];
+// Quelle session de sport pour chaque jour d'entraînement (Lun=0, Jeu=1, Sam=2 dans la semaine)
+const TRAIN_WEEKDAYS = [1, 4, 6]; // lun, jeu, sam (ordre chronologique dans la semaine)
 
 // Sessions tournantes pour la variété (3 séances/sem, on tourne sur les variantes)
 // ===== PROFIL PRISE DE MASSE (toi) =====
@@ -395,33 +420,33 @@ const SESSIONS_GAIN = [
   {
     name: 'UPPER FORCE', sub: 'Haut du corps · Polyarticulaire', xp: 100,
     exercises: [
-      { name: 'Développé couché haltères', sets:4, reps:'8 reps', machine:false, weighted:true, compound:true, xp:22, tip:'EXO ROI du torse. Lourd et contrôlé. Descends jusqu\'à frôler la poitrine.' },
-      { name: 'Tirage vertical (lat pulldown)', sets:4, reps:'8 reps', machine:true, weighted:true, compound:true, xp:22, tip:'EXO ROI du dos. Tire la barre vers le haut du torse, dos en V.' },
-      { name: 'Développé militaire', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, xp:18, tip:'Construit les épaules larges. Pousse au-dessus de la tête.' },
-      { name: 'Rowing assis poulie', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, xp:16, tip:'Serre les omoplates en fin de tirage.' },
-      { name: 'Curl biceps haltères', sets:3, reps:'12 reps', machine:false, weighted:true, xp:12, tip:'Isolation. Pas d\'élan, mouvement propre.' }
+      { name: 'Développé couché haltères', sets:4, reps:'8 reps', machine:false, weighted:true, compound:true, viz:'bench', xp:22, tip:'EXO ROI du torse. Lourd et contrôlé. Descends jusqu\'à frôler la poitrine.' },
+      { name: 'Tirage vertical (lat pulldown)', sets:4, reps:'8 reps', machine:true, weighted:true, compound:true, viz:'pull', xp:22, tip:'EXO ROI du dos. Tire la barre vers le haut du torse, dos en V.' },
+      { name: 'Développé militaire', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, viz:'press', xp:18, tip:'Construit les épaules larges. Pousse au-dessus de la tête.' },
+      { name: 'Rowing assis poulie', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, viz:'row', xp:16, tip:'Serre les omoplates en fin de tirage.' },
+      { name: 'Curl biceps haltères', sets:3, reps:'12 reps', machine:false, weighted:true, viz:'curl', xp:12, tip:'Isolation. Pas d\'élan, mouvement propre.' }
     ],
     cardio: { dur:'8 min', machine:'Vélo', intensity:'Allure facile (récup active)', xp:10 }
   },
   {
     name: 'LOWER POWER', sub: 'Jambes · Polyarticulaire', xp: 100,
     exercises: [
-      { name: 'Presse à cuisses', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, xp:22, tip:'EXO ROI des jambes. Amplitude complète, pousse avec les talons.' },
-      { name: 'Fentes haltères', sets:3, reps:'10 reps / jambe', machine:false, weighted:true, compound:true, xp:18, tip:'Genou avant aligné avec la cheville, pas plus loin.' },
-      { name: 'Leg curl (ischios)', sets:3, reps:'12 reps', machine:true, weighted:true, xp:14, tip:'Isolation arrière de cuisse. Contrôle le retour.' },
-      { name: 'Mollets debout', sets:4, reps:'15 reps', machine:true, weighted:true, xp:12, tip:'Monte sur la pointe, pause 1s en haut.' },
-      { name: 'Gainage planche', sets:3, reps:'45 secondes', machine:false, weighted:false, xp:14, tip:'Corps gainé, pas de creux dans le bas du dos.' }
+      { name: 'Presse à cuisses', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, viz:'press_legs', xp:22, tip:'EXO ROI des jambes. Amplitude complète, pousse avec les talons.' },
+      { name: 'Fentes haltères', sets:3, reps:'10 reps / jambe', machine:false, weighted:true, compound:true, viz:'lunge', xp:18, tip:'Genou avant aligné avec la cheville, pas plus loin.' },
+      { name: 'Leg curl (ischios)', sets:3, reps:'12 reps', machine:true, weighted:true, viz:'squat', xp:14, tip:'Isolation arrière de cuisse. Contrôle le retour.' },
+      { name: 'Mollets debout', sets:4, reps:'15 reps', machine:true, weighted:true, viz:'calf', xp:12, tip:'Monte sur la pointe, pause 1s en haut.' },
+      { name: 'Gainage planche', sets:3, reps:'45 secondes', machine:false, weighted:false, viz:'plank', xp:14, tip:'Corps gainé, pas de creux dans le bas du dos.' }
     ],
     cardio: { dur:'8 min', machine:'Steppeur', intensity:'Rythme modéré constant', xp:10 }
   },
   {
     name: 'PUSH VOLUME', sub: 'Pecs · Épaules · Triceps', xp: 100,
     exercises: [
-      { name: 'Développé incliné haltères', sets:4, reps:'10 reps', machine:false, weighted:true, compound:true, xp:20, tip:'EXO DE BASE. Cible le haut des pecs. Banc incliné à ~30°.' },
-      { name: 'Dips ou développé machine', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, xp:18, tip:'Polyarticulaire pecs/triceps. Descends contrôlé.' },
-      { name: 'Élévations latérales', sets:4, reps:'15 reps', machine:false, weighted:true, xp:16, tip:'Isolation épaules. Léger et strict = largeur d\'épaules.' },
-      { name: 'Pec deck (écarté machine)', sets:3, reps:'12 reps', machine:true, weighted:true, xp:13, tip:'Isolation pecs. Étire bien en ouverture.' },
-      { name: 'Extension triceps poulie', sets:3, reps:'12 reps', machine:true, weighted:true, xp:13, tip:'Coudes collés au corps.' }
+      { name: 'Développé incliné haltères', sets:4, reps:'10 reps', machine:false, weighted:true, compound:true, viz:'bench', xp:20, tip:'EXO DE BASE. Cible le haut des pecs. Banc incliné à ~30°.' },
+      { name: 'Dips ou développé machine', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, viz:'press', xp:18, tip:'Polyarticulaire pecs/triceps. Descends contrôlé.' },
+      { name: 'Élévations latérales', sets:4, reps:'15 reps', machine:false, weighted:true, viz:'lateral', xp:16, tip:'Isolation épaules. Léger et strict = largeur d\'épaules.' },
+      { name: 'Pec deck (écarté machine)', sets:3, reps:'12 reps', machine:true, weighted:true, viz:'fly', xp:13, tip:'Isolation pecs. Étire bien en ouverture.' },
+      { name: 'Extension triceps poulie', sets:3, reps:'12 reps', machine:true, weighted:true, viz:'triceps', xp:13, tip:'Coudes collés au corps.' }
     ],
     cardio: { dur:'10 min', machine:'Vélo', intensity:'Intervalles : 30s fort / 90s facile', xp:12 }
   }
@@ -432,33 +457,33 @@ const SESSIONS_LOSS = [
   {
     name: 'DÉMARRAGE DOUX', sub: 'Cardio léger + corps entier', xp: 100,
     exercises: [
-      { name: 'Vélo — échauffement', cardioStep:true, dur:'5 min', intensity:'Allure facile, monte le rythme doucement', xp:14, tip:'Pas d\'impact, parfait pour les genoux. Juste pour chauffer.' },
-      { name: 'Presse à cuisses légère', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, xp:18, tip:'Polyarticulaire jambes. Charge légère, mouvement propre.' },
-      { name: 'Tirage vertical léger', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, xp:16, tip:'Polyarticulaire dos. Charge modérée.' },
-      { name: 'Squats sur chaise (assis-debout)', sets:3, reps:'10 reps', machine:false, compound:true, xp:16, tip:'Tu te lèves et t\'assois d\'une chaise, contrôlé. Renforce sans risque.' },
-      { name: 'Pompes inclinées (mur ou table)', sets:3, reps:'8 reps', machine:false, compound:true, xp:14, tip:'Mains sur un support haut. Plus c\'est haut, plus c\'est facile.' },
-      { name: 'Marche rapide — tapis', cardioStep:true, dur:'10 min', intensity:'Bon pas, légère inclinaison si possible', xp:20, tip:'Le cœur de la séance. Garde un rythme où tu peux encore parler.' }
+      { name: 'Vélo — échauffement', cardioStep:true, dur:'5 min', intensity:'Allure facile, monte le rythme doucement', viz:'bike', xp:14, tip:'Pas d\'impact, parfait pour les genoux. Juste pour chauffer.' },
+      { name: 'Presse à cuisses légère', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, viz:'press_legs', xp:18, tip:'Polyarticulaire jambes. Charge légère, mouvement propre.' },
+      { name: 'Tirage vertical léger', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, viz:'pull', xp:16, tip:'Polyarticulaire dos. Charge modérée.' },
+      { name: 'Squats sur chaise (assis-debout)', sets:3, reps:'10 reps', machine:false, compound:true, viz:'chair', xp:16, tip:'Tu te lèves et t\'assois d\'une chaise, contrôlé. Renforce sans risque.' },
+      { name: 'Pompes inclinées (mur ou table)', sets:3, reps:'8 reps', machine:false, compound:true, viz:'pushup', xp:14, tip:'Mains sur un support haut. Plus c\'est haut, plus c\'est facile.' },
+      { name: 'Marche rapide — tapis', cardioStep:true, dur:'10 min', intensity:'Bon pas, légère inclinaison si possible', viz:'walk', xp:20, tip:'Le cœur de la séance. Garde un rythme où tu peux encore parler.' }
     ],
     cardio: null
   },
   {
     name: 'CARDIO + TONUS', sub: 'Brûle-graisses sans impact', xp: 100,
     exercises: [
-      { name: 'Vélo — échauffement', cardioStep:true, dur:'5 min', intensity:'Monte le rythme progressivement', xp:12, tip:'Réveille le corps en douceur.' },
-      { name: 'Presse à cuisses', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, xp:18, tip:'Polyarticulaire. Renforce les jambes sans charge sur le dos.' },
-      { name: 'Rowing assis poulie', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, xp:16, tip:'Polyarticulaire dos. Dos droit, tire vers le ventre.' },
-      { name: 'Gainage genoux au sol', sets:3, reps:'20 secondes', machine:false, xp:14, tip:'Version facile de la planche, genoux posés.' },
-      { name: 'Vélo — intervalles doux', cardioStep:true, dur:'12 min', intensity:'1 min actif (plus vite) / 2 min calme, à répéter', xp:24, tip:'LE vrai brûle-graisses. Alterne effort et récup. Sans douleur articulaire.' }
+      { name: 'Vélo — échauffement', cardioStep:true, dur:'5 min', intensity:'Monte le rythme progressivement', viz:'bike', xp:12, tip:'Réveille le corps en douceur.' },
+      { name: 'Presse à cuisses', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, viz:'press_legs', xp:18, tip:'Polyarticulaire. Renforce les jambes sans charge sur le dos.' },
+      { name: 'Rowing assis poulie', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, viz:'row', xp:16, tip:'Polyarticulaire dos. Dos droit, tire vers le ventre.' },
+      { name: 'Gainage genoux au sol', sets:3, reps:'20 secondes', machine:false, viz:'plank', xp:14, tip:'Version facile de la planche, genoux posés.' },
+      { name: 'Vélo — intervalles doux', cardioStep:true, dur:'12 min', intensity:'1 min actif (plus vite) / 2 min calme, à répéter', viz:'bike', xp:24, tip:'LE vrai brûle-graisses. Alterne effort et récup. Sans douleur articulaire.' }
     ],
     cardio: null
   },
   {
     name: 'ENDURANCE', sub: 'Cardio dominant + tonus', xp: 100,
     exercises: [
-      { name: 'Marche rapide — tapis', cardioStep:true, dur:'15 min', intensity:'Inclinaison 3-5%, garde le souffle', xp:24, tip:'Bloc principal. Tu dois transpirer mais pouvoir tenir 15 min.' },
-      { name: 'Squats sur chaise', sets:3, reps:'12 reps', machine:false, compound:true, xp:16, tip:'Profondeur confortable, contrôlé.' },
-      { name: 'Élévations bras petites haltères', sets:3, reps:'12 reps', machine:false, weighted:true, xp:14, tip:'Tonifie le haut du corps. Léger suffit.' },
-      { name: 'Vélo — retour au calme', cardioStep:true, dur:'10 min', intensity:'Rythme constant et modéré', xp:18, tip:'Termine en douceur, fais redescendre le cœur.' }
+      { name: 'Marche rapide — tapis', cardioStep:true, dur:'15 min', intensity:'Inclinaison 3-5%, garde le souffle', viz:'walk', xp:24, tip:'Bloc principal. Tu dois transpirer mais pouvoir tenir 15 min.' },
+      { name: 'Squats sur chaise', sets:3, reps:'12 reps', machine:false, compound:true, viz:'chair', xp:16, tip:'Profondeur confortable, contrôlé.' },
+      { name: 'Élévations bras petites haltères', sets:3, reps:'12 reps', machine:false, weighted:true, viz:'lateral', xp:14, tip:'Tonifie le haut du corps. Léger suffit.' },
+      { name: 'Vélo — retour au calme', cardioStep:true, dur:'10 min', intensity:'Rythme constant et modéré', viz:'bike', xp:18, tip:'Termine en douceur, fais redescendre le cœur.' }
     ],
     cardio: null
   }
@@ -529,7 +554,7 @@ const BADGES = [
   { id:'first', icon:'I', name:'Premier pas', check:(s)=>s.totalWorkouts>=1 },
   { id:'streak3', icon:'III', name:'Série de 3', check:(s)=>s.maxStreak>=3 },
   { id:'week1', icon:'W1', name:'Semaine 1', check:(s)=>s.totalWorkouts>=3 },
-  { id:'hydro', icon:'H2O', name:'Bien hydraté', check:(s)=>s.hydrationDays>=5 },
+  { id:'hydro', icon:'NUT', name:'Nutrition x5', check:(s)=>s.nutritionDays>=5 },
   { id:'lvl5', icon:'L5', name:'Niveau 5', check:(s)=>s.level>=5 },
   { id:'half', icon:'½', name:'Mi-parcours', check:(s)=>s.totalWorkouts>=9 },
   { id:'sleep', icon:'Zzz', name:'Bon dormeur', check:(s)=>s.sleepDays>=7 },
@@ -558,9 +583,15 @@ function storeKey(pid) { return STORE_PREFIX + pid; }
 function loadProfile(pid) {
   try {
     const raw = localStorage.getItem(storeKey(pid));
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if(!p.days) p.days={};
+      if(p.xp===undefined) p.xp=0;
+      if(!p.unlockedBadges) p.unlockedBadges=[];
+      return p;
+    }
   } catch(e){}
-  return { days:{}, xp:0, unlockedBadges:[] };
+  return { days:{}, xp:0, unlockedBadges:[], firstLaunch:null };
 }
 function saveProfile() {
   if (!activeProfile) return;
@@ -568,24 +599,90 @@ function saveProfile() {
 }
 function profileExists(pid) { return localStorage.getItem(storeKey(pid)) !== null; }
 
+// Date de premier lancement du profil (J1). Définie au tout premier render.
+function ensureFirstLaunch() {
+  if(!state.firstLaunch){
+    const d=new Date(); d.setHours(0,0,0,0);
+    state.firstLaunch = d.getTime();
+    saveProfile();
+  }
+}
+function getStartDate() {
+  if(state && state.firstLaunch){ const d=new Date(state.firstLaunch); d.setHours(0,0,0,0); return d; }
+  const d=new Date(); d.setHours(0,0,0,0); return d;
+}
+
+// Index du jour courant depuis le 1er lancement (0 = J1)
 function getDayIndex() {
-  const now=new Date(), start=new Date(START_DATE);
-  start.setHours(0,0,0,0); now.setHours(0,0,0,0);
+  const now=new Date(); now.setHours(0,0,0,0);
+  const start=getStartDate();
   return Math.floor((now-start)/86400000);
 }
-function dateForDay(idx){ const d=new Date(START_DATE); d.setDate(d.getDate()+idx); return d; }
+function dateForDay(idx){ const d=getStartDate(); d.setDate(d.getDate()+idx); return d; }
 function fmtDate(d){ return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}).toUpperCase(); }
 function getWeekNum(idx){ return Math.floor(idx/7)+1; }
 
+// Jour de la semaine (JS getDay 0=Dim..6=Sam) pour un index de jour
+function weekdayForDay(idx){ return dateForDay(idx).getDay(); }
+// Type de jour selon le jour de la semaine réel
+function dayTypeForDay(idx){ return DAY_TYPE_BY_WEEKDAY[weekdayForDay(idx)]; }
+
 function getProfile() { return PROFILES[activeProfile]; }
 
-// Quelle session pour un jour donné (rotation parmi les jours d'entraînement)
+// === VISUELS D'EXERCICE ===
+// Schéma SVG simple selon la catégorie de mouvement (hors-ligne, toujours dispo).
+function vizSVG(viz) {
+  const W='class="viz-body"', S='class="viz-stroke"';
+  const head=(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="5" ${W}/>`;
+  switch(viz){
+    case 'bench': // développé couché
+      return `<svg viewBox="0 0 72 56"><rect x="10" y="34" width="52" height="4" ${W}/><line x1="36" y1="34" x2="36" y2="22" ${W}/>${head(36,16)}<g class="viz-anim"><line x1="20" y1="14" x2="52" y2="14" ${S}/><circle cx="20" cy="14" r="4" class="viz-weight"/><circle cx="52" cy="14" r="4" class="viz-weight"/></g></svg>`;
+    case 'press': // développé vertical / militaire
+      return `<svg viewBox="0 0 72 56">${head(36,40)}<line x1="36" y1="45" x2="36" y2="34" ${W}/><g class="viz-anim"><line x1="22" y1="20" x2="50" y2="20" ${S}/><circle cx="22" cy="20" r="4" class="viz-weight"/><circle cx="50" cy="20" r="4" class="viz-weight"/></g><line x1="36" y1="34" x2="28" y2="22" ${W}/><line x1="36" y1="34" x2="44" y2="22" ${W}/></svg>`;
+    case 'pull': // tirage vertical
+      return `<svg viewBox="0 0 72 56"><g class="viz-anim-down"><line x1="20" y1="12" x2="52" y2="12" ${S}/></g>${head(36,30)}<line x1="36" y1="35" x2="36" y2="46" ${W}/><line x1="36" y1="35" x2="26" y2="18" ${W}/><line x1="36" y1="35" x2="46" y2="18" ${W}/></svg>`;
+    case 'row': // rowing
+      return `<svg viewBox="0 0 72 56">${head(22,22)}<line x1="22" y1="27" x2="22" y2="42" ${W}/><g class="viz-anim"><line x1="22" y1="32" x2="50" y2="32" ${S}/><rect x="48" y="28" width="8" height="8" class="viz-weight"/></g></svg>`;
+    case 'squat': case 'press_legs': // squat / presse jambes
+      return `<svg viewBox="0 0 72 56">${head(36,16)}<g class="viz-anim-down"><line x1="36" y1="21" x2="36" y2="32" ${W}/><line x1="36" y1="32" x2="28" y2="44" ${W}/><line x1="36" y1="32" x2="44" y2="44" ${W}/></g><line x1="24" y1="14" x2="48" y2="14" ${S}/></svg>`;
+    case 'lunge': // fentes
+      return `<svg viewBox="0 0 72 56">${head(34,16)}<line x1="34" y1="21" x2="34" y2="32" ${W}/><g class="viz-anim-down"><line x1="34" y1="32" x2="22" y2="44" ${W}/><line x1="34" y1="32" x2="48" y2="40" ${W}/><line x1="48" y1="40" x2="48" y2="48" ${W}/></g></svg>`;
+    case 'curl': // curl biceps
+      return `<svg viewBox="0 0 72 56">${head(36,16)}<line x1="36" y1="21" x2="36" y2="40" ${W}/><line x1="36" y1="26" x2="26" y2="34" ${W}/><g class="viz-anim"><line x1="26" y1="34" x2="24" y2="24" ${W}/><circle cx="24" cy="22" r="4" class="viz-weight"/></g></svg>`;
+    case 'lateral': // élévations latérales
+      return `<svg viewBox="0 0 72 56">${head(36,18)}<line x1="36" y1="23" x2="36" y2="44" ${W}/><g class="viz-anim"><line x1="36" y1="28" x2="20" y2="26" ${S}/><line x1="36" y1="28" x2="52" y2="26" ${S}/><circle cx="18" cy="26" r="4" class="viz-weight"/><circle cx="54" cy="26" r="4" class="viz-weight"/></g></svg>`;
+    case 'triceps': // extension triceps
+      return `<svg viewBox="0 0 72 56">${head(36,16)}<line x1="36" y1="21" x2="36" y2="42" ${W}/><line x1="36" y1="26" x2="44" y2="20" ${W}/><g class="viz-anim-down"><line x1="44" y1="20" x2="44" y2="34" ${S}/><rect x="40" y="34" width="8" height="6" class="viz-weight"/></g></svg>`;
+    case 'fly': // écarté / pec deck
+      return `<svg viewBox="0 0 72 56">${head(36,18)}<line x1="36" y1="23" x2="36" y2="44" ${W}/><g class="viz-anim"><path d="M36 28 L20 22" ${S}/><path d="M36 28 L52 22" ${S}/></g></svg>`;
+    case 'calf': // mollets
+      return `<svg viewBox="0 0 72 56">${head(36,14)}<line x1="36" y1="19" x2="36" y2="36" ${W}/><g class="viz-anim"><line x1="36" y1="36" x2="36" y2="46" ${W}/><line x1="30" y1="48" x2="42" y2="48" ${S}/></g></svg>`;
+    case 'plank': // gainage
+      return `<svg viewBox="0 0 72 56"><line x1="14" y1="40" x2="58" y2="30" class="viz-stroke"/>${head(58,26)}<line x1="20" y1="40" x2="20" y2="48" ${W}/></svg>`;
+    case 'pushup': // pompes
+      return `<svg viewBox="0 0 72 56"><g class="viz-anim-down"><line x1="14" y1="36" x2="56" y2="28" class="viz-stroke"/>${head(56,24)}</g><line x1="20" y1="36" x2="20" y2="46" ${W}/><line x1="44" y1="34" x2="44" y2="46" ${W}/></svg>`;
+    case 'chair': // squat sur chaise
+      return `<svg viewBox="0 0 72 56"><rect x="40" y="34" width="16" height="14" ${W}/>${head(30,16)}<g class="viz-anim-down"><line x1="30" y1="21" x2="30" y2="34" ${W}/><line x1="30" y1="34" x2="24" y2="46" ${W}/></g></svg>`;
+    case 'bike': // vélo
+      return `<svg viewBox="0 0 72 56"><circle cx="22" cy="40" r="10" ${W}/><circle cx="52" cy="40" r="10" ${W}/><g class="viz-anim"><circle cx="37" cy="40" r="3" class="viz-weight"/></g><line x1="37" y1="40" x2="44" y2="22" ${W}/>${head(46,18)}</svg>`;
+    case 'walk': // marche tapis
+      return `<svg viewBox="0 0 72 56"><line x1="10" y1="46" x2="62" y2="46" class="viz-stroke"/>${head(36,16)}<line x1="36" y1="21" x2="36" y2="32" ${W}/><g class="viz-anim"><line x1="36" y1="32" x2="28" y2="44" ${W}/><line x1="36" y1="32" x2="44" y2="42" ${W}/></g></svg>`;
+    default:
+      return `<svg viewBox="0 0 72 56">${head(36,18)}<line x1="36" y1="23" x2="36" y2="40" class="viz-body"/><line x1="36" y1="28" x2="26" y2="36" class="viz-body"/><line x1="36" y1="28" x2="46" y2="36" class="viz-body"/></svg>`;
+  }
+}
+function videoURL(exName){
+  return 'https://www.youtube.com/results?search_query='+encodeURIComponent(exName+' exercice technique');
+}
+
+// Quelle session de sport pour un jour d'entraînement donné.
+// On fait tourner les séances dans l'ordre chronologique des jours d'entraînement
+// depuis le 1er lancement, pour garder la variété.
 function sessionForDay(idx) {
   const p = getProfile();
-  if (DAY_TYPE[idx % 7] !== 'train') return null;
-  // compter combien de jours d'entraînement avant celui-ci
+  if (dayTypeForDay(idx) !== 'train') return null;
   let trainCount = 0;
-  for (let i=0; i<=idx; i++) if (DAY_TYPE[i%7]==='train') trainCount++;
+  for (let i=0; i<=idx; i++) if (dayTypeForDay(i)==='train') trainCount++;
   return p.sessions[(trainCount-1) % p.sessions.length];
 }
 function getPhase(week) {
@@ -595,10 +692,9 @@ function getPhase(week) {
 
 function getDay(idx) {
   const k='d'+idx;
-  if(!state.days[k]) state.days[k]={ exercises:{}, sets:{}, cardioSteps:{}, stretches:{}, yoga:{}, hydration:0, sleep:0, nutrition:false, validated:false };
+  if(!state.days[k]) state.days[k]={ exercises:{}, sets:{}, cardioSteps:{}, stretches:{}, yoga:{}, sleep:0, nutrition:false, validated:false };
   const d=state.days[k];
   ['exercises','sets','cardioSteps','stretches','yoga'].forEach(f=>{ if(!d[f]) d[f]={}; });
-  if(d.hydration===undefined)d.hydration=0;
   if(d.sleep===undefined)d.sleep=0;
   if(d.nutrition===undefined)d.nutrition=false;
   if(d.validated===undefined)d.validated=false;
@@ -651,25 +747,24 @@ function lastWeightFor(exName, beforeIdx) {
 
 function computeStats() {
   const todayIdx=getDayIndex();
-  let totalWorkouts=0, hydrationDays=0, sleepDays=0, nutritionDays=0, cardioCount=0;
+  let totalWorkouts=0, sleepDays=0, nutritionDays=0, cardioCount=0;
   let currentStreak=0, maxStreak=0, runStreak=0;
   for(let i=0;i<TOTAL_DAYS;i++){
-    const d=state.days['d'+i]; if(!d) { if(DAY_TYPE[i%7]==='train' && i<=todayIdx) runStreak=0; continue; }
+    const d=state.days['d'+i]; if(!d) { if(dayTypeForDay(i)==='train' && i<=todayIdx) runStreak=0; continue; }
     const complete = d.validated===true;
     if(complete){ totalWorkouts++; runStreak++; maxStreak=Math.max(maxStreak,runStreak); }
-    else if(DAY_TYPE[i%7]==='train' && i<=todayIdx){ runStreak=0; }
+    else if(dayTypeForDay(i)==='train' && i<=todayIdx){ runStreak=0; }
     if(d.cardioSteps) cardioCount += Object.values(d.cardioSteps).filter(Boolean).length;
-    if(d.hydration>=6) hydrationDays++;
     if(d.sleep>=7) sleepDays++;
     if(d.nutrition) nutritionDays++;
   }
   for(let i=Math.min(todayIdx,TOTAL_DAYS-1);i>=0;i--){
-    if(DAY_TYPE[i%7]!=='train') continue;
+    if(dayTypeForDay(i)!=='train') continue;
     const d=state.days['d'+i]; if(!d||!d.validated) break;
     currentStreak++;
   }
   const lv=levelFromXP(state.xp);
-  return { totalWorkouts, hydrationDays, sleepDays, nutritionDays, cardioCount, currentStreak, maxStreak, level:lv.level, xp:state.xp };
+  return { totalWorkouts, sleepDays, nutritionDays, cardioCount, currentStreak, maxStreak, level:lv.level, xp:state.xp };
 }
 
 // XP award + badge check + toasts. amount peut être négatif (décochage).
@@ -773,6 +868,7 @@ function renderProfileSelect() {
 // ============================================================
 function render() {
   if(!activeProfile){ renderProfileSelect(); return; }
+  ensureFirstLaunch();
   const p=getProfile();
   document.body.className=p.bodyClass;
   const todayIdx=getDayIndex();
@@ -846,21 +942,21 @@ function renderToday(todayIdx) {
     `;
   }
 
-  const dayType = DAY_TYPE[todayIdx % 7];
+  const dayType = dayTypeForDay(todayIdx);
   const date=dateForDay(todayIdx);
   const weekNum=getWeekNum(todayIdx);
   const phase=getPhase(weekNum);
-  const dayLabel=DAYS_FR[todayIdx % 7];
+  const dayLabel=WEEKDAY_FR[weekdayForDay(todayIdx)];
 
-  // Jour OFF (mercredi)
+  // Jour OFF (mercredi) — repos total
   if(dayType==='off'){
     return renderRestDay(todayIdx, dayLabel, date, weekNum, phase, true);
   }
-  // Jour REST (récup active)
-  if(dayType==='rest'){
+  // Jour ÉTIREMENTS (mar/ven/dim)
+  if(dayType==='stretch'){
     return renderRestDay(todayIdx, dayLabel, date, weekNum, phase, false);
   }
-  // Jour TRAIN
+  // Jour SPORT
   return renderTrainDay(todayIdx, dayLabel, date, weekNum, phase);
 }
 
@@ -868,18 +964,19 @@ function renderRestDay(idx, dayLabel, date, weekNum, phase, isOff) {
   const dd=getDay(idx);
   const stretchDone=Object.values(dd.stretches||{}).filter(Boolean).length;
   const yogaDone=Object.values(dd.yoga||{}).filter(Boolean).length;
+  // isOff=true => mercredi repos total. isOff=false => jour d'étirements (mar/ven/dim).
   return `
     <div class="banner rest">
       <span class="banner-corner tl"></span><span class="banner-corner tr"></span><span class="banner-corner bl"></span><span class="banner-corner br"></span>
       <div class="banner-id">${dayLabel} · ${fmtDate(date)} · SEM ${String(weekNum).padStart(2,'0')}</div>
-      <div class="banner-title">${isOff?'OFF DAY':'RÉCUP'}</div>
-      <div class="banner-sub">${isOff?'Repos total · Le muscle se reconstruit':'Repos actif · Mobilité optionnelle'}</div>
+      <div class="banner-title">${isOff?'REPOS TOTAL':'ÉTIREMENTS'}</div>
+      <div class="banner-sub">${isOff?'Pas de sport · Le corps se reconstruit':'Jour de souplesse · Garde le corps mobile'}</div>
     </div>
     <div class="phase-note" style="padding:11px 14px;margin-bottom:18px;background:var(--bg-2);border:1px solid var(--border);border-left:2px solid var(--amber);">
-      <div style="font-size:9px;letter-spacing:0.2em;color:var(--amber);text-transform:uppercase;margin-bottom:3px;font-weight:700;">${phase.label}</div>
-      <div style="font-size:11px;color:var(--ink-dim);line-height:1.6;">${isOff?'Pas de salle aujourd\'hui. Repos complet. Mange bien, dors bien, hydrate-toi. La récup fait partie du programme.':phase.tip}</div>
+      <div style="font-size:9px;letter-spacing:0.2em;color:var(--amber);text-transform:uppercase;margin-bottom:3px;font-weight:700;">${isOff?'JOUR DE REPOS':phase.label}</div>
+      <div style="font-size:11px;color:var(--ink-dim);line-height:1.6;">${isOff?'Aucune séance aujourd\'hui. Repos complet : c\'est là que le muscle se construit. Mange bien et dors bien.':'Pas de sport, mais 10 min d\'étirements ou de yoga te font gagner en souplesse et préviennent les blessures. Coche ce que tu fais.'}</div>
     </div>
-    <div class="section-label">Mobilité <span class="count">optionnel · +XP</span></div>
+    <div class="section-label">${isOff?'Mobilité (optionnel)':'Programme du jour'} <span class="count">+XP</span></div>
     <button class="collapse-btn ${openSections.stretches?'open':''}" data-toggle="stretches"><span>Étirements (${stretchDone}/${STRETCHES.length}) · +15 XP</span><span class="arrow">▸</span></button>
     ${openSections.stretches?`<div class="collapse-body">${STRETCHES.map((s,i)=>{const ck=dd.stretches[i]||false;return `<div class="routine-item ${ck?'done':''}" data-action="stretch" data-day="${idx}" data-idx="${i}"><div class="ex-check"></div><div class="routine-item-name">${s.name}</div><div class="routine-item-target">${s.target}</div></div>`;}).join('')}</div>`:''}
     <button class="collapse-btn ${openSections.yoga?'open':''}" data-toggle="yoga"><span>Yoga 15 min (${yogaDone}/${YOGA.length}) · +20 XP</span><span class="arrow">▸</span></button>
@@ -924,6 +1021,10 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
             <div class="cardio-step-line"><span class="cardio-step-dur">${ex.dur}</span><span class="exo-tag cardio">CARDIO</span></div>
             <div class="cardio-step-intensity">${ex.intensity}</div>
             ${ex.tip?`<div class="cardio-step-tip">${ex.tip}</div>`:''}
+            <div class="exo-viz" style="padding:8px 0 0 0;">
+              <div class="exo-viz-svg">${vizSVG(ex.viz)}</div>
+              <a class="exo-demo-btn" href="${videoURL(ex.name)}" target="_blank" rel="noopener" data-stop="1"><span class="play">▶</span> Voir la démo</a>
+            </div>
           </div>
           <div class="cardio-step-check"></div>
         </div>
@@ -991,6 +1092,10 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
           <div class="exo-xp">+${ex.xp}</div>
         </div>
         ${ex.tip?`<div class="exo-tip">${ex.tip}</div>`:''}
+        <div class="exo-viz">
+          <div class="exo-viz-svg">${vizSVG(ex.viz)}</div>
+          <a class="exo-demo-btn" href="${videoURL(ex.name)}" target="_blank" rel="noopener"><span class="play">▶</span> Voir la démo vidéo</a>
+        </div>
         ${prevHtml}
         ${setsHtml}
       </div>
@@ -1035,11 +1140,7 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
 
 function renderVitals(idx, dd) {
   return `
-    <div class="section-label">Suivi du jour <span class="count">sommeil & nutrition = +XP</span></div>
-    <div class="hydration">
-      <div class="hydration-header"><div class="hydration-label">// HYDRATATION</div><div class="hydration-count">${dd.hydration}/8</div></div>
-      <div class="hydration-glasses">${[1,2,3,4,5,6,7,8].map(n=>`<div class="glass ${n<=dd.hydration?'full':''}" data-action="hydration" data-day="${idx}" data-val="${n}"></div>`).join('')}</div>
-    </div>
+    <div class="section-label">Suivi du jour <span class="count">+XP</span></div>
     <div class="sleep-input">
       <div class="sleep-label">// SOMMEIL</div>
       <div class="sleep-row"><input type="range" min="0" max="12" step="0.5" value="${dd.sleep}" data-action="sleep" data-day="${idx}" /><div class="sleep-value" id="sleep-val-${idx}">${dd.sleep}<span style="font-size:11px;">h</span></div></div>
@@ -1064,7 +1165,7 @@ function renderWeek(todayIdx) {
     </div>
     ${[0,1,2,3,4,5,6].map(i=>{
       const dayIdx=weekStart+i;
-      const dt=DAY_TYPE[i];
+      const dt=dayTypeForDay(dayIdx);
       const sess=sessionForDay(dayIdx);
       const dd=state.days['d'+dayIdx];
       const total=sess?sess.exercises.length:0;
@@ -1074,11 +1175,11 @@ function renderWeek(todayIdx) {
       const complete=dd&&dd.validated===true;
       let cls='day-card'; if(isToday)cls+=' today'; if(complete)cls+=' complete'; if(dt!=='train')cls+=' rest-day';
       let title, stat;
-      if(dt==='off'){ title='Off · Repos total'; stat='—'; }
-      else if(dt==='rest'){ title='Récup · Mobilité'; stat='○'; }
+      if(dt==='off'){ title='Repos total'; stat='—'; }
+      else if(dt==='stretch'){ title='Étirements · Souplesse'; stat='○'; }
       else { title=sess.name+' · '+sess.sub.split('·')[0].trim(); stat=done+'/'+total; }
       return `<div class="${cls}">
-        <div class="day-card-dot-wrap"><div class="day-card-day-name">${DAYS_FR[i]}</div><div class="day-card-day-num">D${String(dayIdx+1).padStart(2,'0')}</div></div>
+        <div class="day-card-dot-wrap"><div class="day-card-day-name">${WEEKDAY_FR[weekdayForDay(dayIdx)]}</div><div class="day-card-day-num">J${String(dayIdx+1).padStart(2,'0')}</div></div>
         <div><div class="day-card-title">${title}</div><div class="day-card-date">${fmtDate(dateForDay(dayIdx))}</div></div>
         <div class="day-card-stat">${stat}</div>
       </div>`;
@@ -1136,11 +1237,11 @@ function renderGuide() {
   const intel=p.intel;
   return `
     <div class="guide-block">
-      <h3>// SCHEDULE</h3>
-      <p>Entraînement un jour sur deux, mercredi toujours off. ${p.weeklyGoal} séances/semaine. La récup fait partie du plan.</p>
+      <h3>// PLANNING</h3>
+      <p>Sport 3 fois par semaine : lundi, jeudi, samedi. Mercredi repos total. Les autres jours sont consacrés aux étirements pour la souplesse. L'app détecte automatiquement le jour et t'affiche la bonne séance.</p>
       <ul>
-        <li>LUN · Entraînement</li><li>MAR · Récup / mobilité</li><li>MER · OFF total</li>
-        <li>JEU · Entraînement</li><li>VEN · Récup / mobilité</li><li>SAM · Entraînement</li><li>DIM · Récup</li>
+        <li>LUN · Sport</li><li>MAR · Étirements</li><li>MER · Repos total</li>
+        <li>JEU · Sport</li><li>VEN · Étirements</li><li>SAM · Sport</li><li>DIM · Étirements</li>
       </ul>
     </div>
     ${intel.blocks.map(b=>`
@@ -1228,7 +1329,8 @@ function attachListeners() {
   }));
 
   // Étape cardio (cochage simple, XP symétrique)
-  document.querySelectorAll('[data-action="cardiostep"]').forEach(el=>el.addEventListener('click',()=>{
+  document.querySelectorAll('[data-action="cardiostep"]').forEach(el=>el.addEventListener('click',(e)=>{
+    if(e.target.closest('[data-stop]')) return; // clic sur le lien démo : ne pas cocher
     const idx=parseInt(el.dataset.day), i=parseInt(el.dataset.idx);
     const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[i];
     const was=d.cardioSteps[i]||false; d.cardioSteps[i]=!was;
@@ -1236,6 +1338,8 @@ function attachListeners() {
     if(was && d.validated){ d.validated=false; awardXP(-sess.xp,'Séance annulée'); }
     saveProfile(); render();
   }));
+  // Liens démo : empêcher la propagation (ouvrent juste le lien)
+  document.querySelectorAll('[data-stop]').forEach(el=>el.addEventListener('click',(e)=>e.stopPropagation()));
   document.querySelectorAll('[data-action="stretch"]').forEach(el=>el.addEventListener('click',()=>{
     const idx=parseInt(el.dataset.day), i=el.dataset.idx; const d=getDay(idx);
     const was=d.stretches[i]||false; d.stretches[i]=!was;
@@ -1250,12 +1354,6 @@ function attachListeners() {
     const allDone=Object.values(d.yoga).filter(Boolean).length===YOGA.length;
     if(allDone && !d.yogaAwarded){ d.yogaAwarded=true; awardXP(20,'Yoga'); }
     else if(!allDone && d.yogaAwarded){ d.yogaAwarded=false; awardXP(-20,'Yoga'); }
-    saveProfile(); render();
-  }));
-  // Hydratation : simple suivi, AUCUN XP (on boit déjà assez)
-  document.querySelectorAll('[data-action="hydration"]').forEach(el=>el.addEventListener('click',()=>{
-    const idx=parseInt(el.dataset.day), v=parseInt(el.dataset.val); const d=getDay(idx);
-    d.hydration = d.hydration===v ? v-1 : v;
     saveProfile(); render();
   }));
   document.querySelectorAll('[data-action="sleep"]').forEach(el=>{
