@@ -153,6 +153,65 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .ex-tip { font-size:10px; color:var(--ink-faint); margin-top:4px; line-height:1.4; font-style:italic; }
 .ex-xp { font-size:9px; font-family:'Orbitron',monospace; font-weight:700; color:var(--gold); white-space:nowrap; padding-top:2px; }
 
+/* === EXERCISE CARD (new set-based) === */
+.exo { background:var(--bg-2); border:1px solid var(--border); margin-bottom:8px; transition:all 0.15s; }
+.exo.done { border-color:rgba(0,255,156,0.25); }
+.exo-head { display:grid; grid-template-columns:30px 1fr auto; gap:12px; align-items:flex-start; padding:14px 12px; }
+.exo-num { font-family:'Orbitron',monospace; font-weight:900; font-size:18px; color:var(--magenta); text-shadow:0 0 6px rgba(240,65,255,0.3); line-height:1; padding-top:2px; }
+.exo.done .exo-num { color:var(--ok); }
+.exo-info { min-width:0; }
+.exo-name { font-size:14px; font-weight:700; color:var(--ink); line-height:1.25; margin-bottom:5px; }
+.exo-meta { display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
+.exo-tag { font-size:9px; padding:2px 7px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700; border:1px solid; }
+.exo-tag.base { color:var(--gold); border-color:rgba(255,217,61,0.4); background:rgba(255,217,61,0.06); }
+.exo-tag.machine { color:var(--cyan); border-color:var(--cyan-dim); }
+.exo-tag.libre { color:var(--magenta); border-color:var(--magenta-dim); }
+.exo-tag.cardio { color:var(--orange); border-color:#b34721; background:rgba(255,107,53,0.06); }
+.exo-prescription { font-size:11px; color:var(--ink); font-weight:500; }
+.exo-xp { font-family:'Orbitron',monospace; font-weight:700; font-size:10px; color:var(--gold); white-space:nowrap; padding-top:2px; }
+.exo-tip { font-size:10px; color:var(--ink-faint); line-height:1.45; font-style:italic; padding:0 12px 12px 54px; margin-top:-4px; }
+.exo-prev { font-size:10px; padding:0 12px 10px 54px; letter-spacing:0.03em; color:var(--ink-faint); }
+.exo-prev .up { color:var(--ok); } .exo-prev .down { color:var(--amber); } .exo-prev .same { color:var(--ink-dim); }
+
+/* SET ROWS */
+.sets { padding:0 12px 12px 12px; }
+.set-head { display:grid; grid-template-columns:24px 1fr 1fr 26px; gap:8px; padding:0 4px 6px; font-size:8px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); }
+.set-head span:nth-child(3), .set-head span:nth-child(4) { text-align:center; }
+.set-row { display:grid; grid-template-columns:24px 1fr 1fr 26px; gap:8px; align-items:center; padding:5px 4px; border-top:1px solid var(--border); }
+.set-idx { font-family:'Orbitron',monospace; font-weight:700; font-size:12px; color:var(--ink-dim); text-align:center; }
+.set-input { height:34px; background:var(--bg); border:1px solid var(--border-bright); color:var(--ink); font-family:'Orbitron',monospace; font-size:13px; font-weight:700; text-align:center; width:100%; }
+.set-input:focus { border-color:var(--accent); }
+.set-input::placeholder { color:var(--ink-faint); font-weight:400; }
+.set-input.cardio-na { background:transparent; border:none; color:var(--ink-faint); font-size:11px; font-family:'JetBrains Mono',monospace; }
+.set-check { width:26px; height:26px; border:1.5px solid var(--ink-faint); position:relative; cursor:pointer; margin:0 auto; transition:all 0.12s; }
+.set-row.done .set-check { background:var(--ok); border-color:var(--ok); box-shadow:0 0 6px rgba(0,255,156,0.4); }
+.set-row.done .set-check::after { content:''; position:absolute; top:5px; left:9px; width:5px; height:11px; border-right:2px solid var(--bg); border-bottom:2px solid var(--bg); transform:rotate(45deg); }
+.set-row.done .set-input { opacity:0.6; }
+
+/* CARDIO STEP (big, clear) */
+.cardio-step { background:var(--bg-2); border:1px solid #b34721; border-left:3px solid var(--orange); margin-bottom:8px; padding:14px 12px; display:grid; grid-template-columns:30px 1fr 26px; gap:12px; align-items:flex-start; cursor:pointer; }
+.cardio-step.done { background:rgba(0,255,156,0.03); border-color:rgba(0,255,156,0.25); border-left-color:var(--ok); }
+.cardio-step-num { font-family:'Orbitron',monospace; font-weight:900; font-size:18px; color:var(--orange); line-height:1; padding-top:2px; }
+.cardio-step.done .cardio-step-num { color:var(--ok); }
+.cardio-step-name { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.cardio-step-line { display:flex; align-items:baseline; gap:8px; margin-bottom:4px; }
+.cardio-step-dur { font-family:'Orbitron',monospace; font-weight:900; font-size:20px; color:var(--orange); text-shadow:0 0 6px rgba(255,107,53,0.3); }
+.cardio-step.done .cardio-step-dur { color:var(--ok); }
+.cardio-step-intensity { font-size:11px; color:var(--ink); line-height:1.4; }
+.cardio-step-tip { font-size:10px; color:var(--ink-faint); font-style:italic; margin-top:4px; line-height:1.4; }
+.cardio-step-check { width:26px; height:26px; border:1.5px solid var(--ink-faint); position:relative; flex-shrink:0; }
+.cardio-step.done .cardio-step-check { background:var(--ok); border-color:var(--ok); }
+.cardio-step.done .cardio-step-check::after { content:''; position:absolute; top:5px; left:9px; width:5px; height:11px; border-right:2px solid var(--bg); border-bottom:2px solid var(--bg); transform:rotate(45deg); }
+
+/* VALIDATE SESSION button */
+.validate-zone { margin:20px 0 8px; }
+.validate-btn { width:100%; padding:18px; background:linear-gradient(135deg, var(--accent-dim), var(--accent)); color:var(--bg); border:none; font-family:'Orbitron',monospace; font-size:14px; letter-spacing:0.12em; text-transform:uppercase; font-weight:900; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; box-shadow:0 0 16px var(--accent); }
+.validate-btn:active { transform:scale(0.98); }
+.validate-btn:disabled { background:var(--bg-2); color:var(--ink-faint); border:1px solid var(--border); box-shadow:none; cursor:not-allowed; }
+.validate-btn .vb-sub { display:block; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:400; letter-spacing:0.15em; margin-top:4px; opacity:0.8; }
+.validate-done { width:100%; padding:18px; background:rgba(0,255,156,0.06); border:1px solid var(--ok); color:var(--ok); font-family:'Orbitron',monospace; font-size:14px; letter-spacing:0.12em; text-transform:uppercase; font-weight:900; text-align:center; }
+.validate-done .vd-sub { display:block; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:400; letter-spacing:0.15em; margin-top:4px; color:var(--ink-dim); }
+
 /* COLLAPSE */
 .collapse-btn { width:100%; padding:11px 14px; background:var(--bg-2); border:1px solid var(--border); color:var(--ink-dim); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; text-align:left; font-weight:500; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s; margin-bottom:6px; }
 .collapse-btn:hover { color:var(--accent); border-color:var(--accent-dim); }
@@ -288,6 +347,7 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .toast-wrap { position:fixed; top:env(safe-area-inset-top); left:0; right:0; z-index:300; display:flex; flex-direction:column; align-items:center; gap:8px; padding-top:16px; pointer-events:none; }
 .toast { background:var(--bg-2); border:1px solid var(--accent); padding:10px 18px; font-size:11px; letter-spacing:0.1em; color:var(--accent); box-shadow:0 0 16px rgba(5,242,219,0.2); animation:pop 0.3s; max-width:90%; text-align:center; }
 .toast.xp { border-color:var(--gold); color:var(--gold); box-shadow:0 0 16px rgba(255,217,61,0.2); }
+.toast.xp-neg { border-color:var(--ink-dim); color:var(--ink-dim); box-shadow:none; }
 .toast.levelup { border-color:var(--gold); color:var(--gold); font-family:'Orbitron',monospace; font-weight:700; animation:levelup-glow 1s infinite, pop 0.3s; }
 .toast.badge { border-color:var(--magenta); color:var(--magenta); }
 .toast strong { font-family:'Orbitron',monospace; }
@@ -325,37 +385,37 @@ const DAYS_FR = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
 // ===== PROFIL PRISE DE MASSE (toi) =====
 const SESSIONS_GAIN = [
   {
-    name: 'UPPER FORCE', sub: 'Haut du corps · Charges lourdes', xp: 100,
+    name: 'UPPER FORCE', sub: 'Haut du corps · Polyarticulaire', xp: 100,
     exercises: [
-      { name: 'Développé couché haltères', target: '4 × 8', machine:false, xp:20, tip:'Lourd, contrôlé. Le pilier du torse.' },
-      { name: 'Tirage vertical', target: '4 × 8', machine:true, xp:20, tip:'Dos en V.' },
-      { name: 'Développé militaire', target: '3 × 10', machine:true, xp:15, tip:'Épaules larges.' },
-      { name: 'Rowing assis poulie', target: '3 × 10', machine:true, xp:15, tip:'Serre les omoplates.' },
-      { name: 'Curl + extension triceps (superset)', target: '3 × 12', machine:false, xp:15, tip:'Enchaîne sans repos.' }
+      { name: 'Développé couché haltères', sets:4, reps:'8 reps', machine:false, weighted:true, compound:true, xp:22, tip:'EXO ROI du torse. Lourd et contrôlé. Descends jusqu\'à frôler la poitrine.' },
+      { name: 'Tirage vertical (lat pulldown)', sets:4, reps:'8 reps', machine:true, weighted:true, compound:true, xp:22, tip:'EXO ROI du dos. Tire la barre vers le haut du torse, dos en V.' },
+      { name: 'Développé militaire', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, xp:18, tip:'Construit les épaules larges. Pousse au-dessus de la tête.' },
+      { name: 'Rowing assis poulie', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, xp:16, tip:'Serre les omoplates en fin de tirage.' },
+      { name: 'Curl biceps haltères', sets:3, reps:'12 reps', machine:false, weighted:true, xp:12, tip:'Isolation. Pas d\'élan, mouvement propre.' }
     ],
-    cardio: { name:'Vélo récup', detail:'8 min easy', xp:10 }
+    cardio: { dur:'8 min', machine:'Vélo', intensity:'Allure facile (récup active)', xp:10 }
   },
   {
-    name: 'LOWER POWER', sub: 'Jambes · Fessiers · Core', xp: 100,
+    name: 'LOWER POWER', sub: 'Jambes · Polyarticulaire', xp: 100,
     exercises: [
-      { name: 'Presse à cuisses', target: '4 × 10', machine:true, xp:20, tip:'Amplitude complète.' },
-      { name: 'Fentes haltères', target: '3 × 10/jambe', machine:false, xp:18, tip:'Genou aligné cheville.' },
-      { name: 'Leg curl ischios', target: '3 × 12', machine:true, xp:15, tip:'Contrôle le retour.' },
-      { name: 'Mollets debout', target: '4 × 15', machine:true, xp:12, tip:'Pause en haut.' },
-      { name: 'Gainage planche', target: '3 × 45s', machine:false, xp:15, tip:'Corps gainé.' }
+      { name: 'Presse à cuisses', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, xp:22, tip:'EXO ROI des jambes. Amplitude complète, pousse avec les talons.' },
+      { name: 'Fentes haltères', sets:3, reps:'10 reps / jambe', machine:false, weighted:true, compound:true, xp:18, tip:'Genou avant aligné avec la cheville, pas plus loin.' },
+      { name: 'Leg curl (ischios)', sets:3, reps:'12 reps', machine:true, weighted:true, xp:14, tip:'Isolation arrière de cuisse. Contrôle le retour.' },
+      { name: 'Mollets debout', sets:4, reps:'15 reps', machine:true, weighted:true, xp:12, tip:'Monte sur la pointe, pause 1s en haut.' },
+      { name: 'Gainage planche', sets:3, reps:'45 secondes', machine:false, weighted:false, xp:14, tip:'Corps gainé, pas de creux dans le bas du dos.' }
     ],
-    cardio: { name:'Steppeur', detail:'8 min modéré', xp:10 }
+    cardio: { dur:'8 min', machine:'Steppeur', intensity:'Rythme modéré constant', xp:10 }
   },
   {
-    name: 'PUSH HYPERTROPHIE', sub: 'Pecs · Épaules · Triceps · Volume', xp: 100,
+    name: 'PUSH VOLUME', sub: 'Pecs · Épaules · Triceps', xp: 100,
     exercises: [
-      { name: 'Développé incliné haltères', target: '4 × 10', machine:false, xp:18, tip:'Cible le haut des pecs.' },
-      { name: 'Élévations latérales', target: '4 × 15', machine:false, xp:18, tip:'Léger, strict, largeur d\'épaules.' },
-      { name: 'Pec deck (écarté machine)', target: '3 × 12', machine:true, xp:15, tip:'Étire bien.' },
-      { name: 'Dips ou extension triceps', target: '3 × 12', machine:false, xp:15, tip:'Coudes serrés.' },
-      { name: 'Oiseau (épaules arrière)', target: '3 × 15', machine:false, xp:14, tip:'Posture droite.' }
+      { name: 'Développé incliné haltères', sets:4, reps:'10 reps', machine:false, weighted:true, compound:true, xp:20, tip:'EXO DE BASE. Cible le haut des pecs. Banc incliné à ~30°.' },
+      { name: 'Dips ou développé machine', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, xp:18, tip:'Polyarticulaire pecs/triceps. Descends contrôlé.' },
+      { name: 'Élévations latérales', sets:4, reps:'15 reps', machine:false, weighted:true, xp:16, tip:'Isolation épaules. Léger et strict = largeur d\'épaules.' },
+      { name: 'Pec deck (écarté machine)', sets:3, reps:'12 reps', machine:true, weighted:true, xp:13, tip:'Isolation pecs. Étire bien en ouverture.' },
+      { name: 'Extension triceps poulie', sets:3, reps:'12 reps', machine:true, weighted:true, xp:13, tip:'Coudes collés au corps.' }
     ],
-    cardio: { name:'Vélo intervalles', detail:'10 min · 30s fort/90s easy', xp:12 }
+    cardio: { dur:'10 min', machine:'Vélo', intensity:'Intervalles : 30s fort / 90s facile', xp:12 }
   }
 ];
 
@@ -364,32 +424,33 @@ const SESSIONS_LOSS = [
   {
     name: 'DÉMARRAGE DOUX', sub: 'Cardio léger + corps entier', xp: 100,
     exercises: [
-      { name: 'Vélo (chauffe)', target: '5 min easy', machine:true, cardio:true, xp:15, tip:'Pas d\'impact, parfait pour les genoux.' },
-      { name: 'Squats sur chaise (assis-debout)', target: '3 × 10', machine:false, xp:18, tip:'Tu te lèves et t\'assois, contrôlé.' },
-      { name: 'Pompes inclinées (mur ou table)', target: '3 × 8', machine:false, xp:18, tip:'Plus c\'est haut, plus c\'est facile.' },
-      { name: 'Tirage vertical léger', target: '3 × 12', machine:true, xp:15, tip:'Charge modérée, mouvement propre.' },
-      { name: 'Marche rapide tapis', target: '10 min', machine:true, cardio:true, xp:16, tip:'Incline légère si possible.' }
+      { name: 'Vélo — échauffement', cardioStep:true, dur:'5 min', intensity:'Allure facile, monte le rythme doucement', xp:14, tip:'Pas d\'impact, parfait pour les genoux. Juste pour chauffer.' },
+      { name: 'Presse à cuisses légère', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, xp:18, tip:'Polyarticulaire jambes. Charge légère, mouvement propre.' },
+      { name: 'Tirage vertical léger', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, xp:16, tip:'Polyarticulaire dos. Charge modérée.' },
+      { name: 'Squats sur chaise (assis-debout)', sets:3, reps:'10 reps', machine:false, compound:true, xp:16, tip:'Tu te lèves et t\'assois d\'une chaise, contrôlé. Renforce sans risque.' },
+      { name: 'Pompes inclinées (mur ou table)', sets:3, reps:'8 reps', machine:false, compound:true, xp:14, tip:'Mains sur un support haut. Plus c\'est haut, plus c\'est facile.' },
+      { name: 'Marche rapide — tapis', cardioStep:true, dur:'10 min', intensity:'Bon pas, légère inclinaison si possible', xp:20, tip:'Le cœur de la séance. Garde un rythme où tu peux encore parler.' }
     ],
     cardio: null
   },
   {
     name: 'CARDIO + TONUS', sub: 'Brûle-graisses sans impact', xp: 100,
     exercises: [
-      { name: 'Vélo (chauffe)', target: '5 min', machine:true, cardio:true, xp:14, tip:'Monte le rythme progressivement.' },
-      { name: 'Presse à cuisses légère', target: '3 × 12', machine:true, xp:16, tip:'Renforce les jambes sans charge sur le dos.' },
-      { name: 'Rowing assis poulie', target: '3 × 12', machine:true, xp:16, tip:'Posture, dos droit.' },
-      { name: 'Gainage genoux au sol', target: '3 × 20s', machine:false, xp:16, tip:'Version facile de la planche.' },
-      { name: 'Vélo intervalles doux', target: '12 min · 1min actif/2min calme', machine:true, cardio:true, xp:22, tip:'Le vrai brûleur. Sans douleur articulaire.' }
+      { name: 'Vélo — échauffement', cardioStep:true, dur:'5 min', intensity:'Monte le rythme progressivement', xp:12, tip:'Réveille le corps en douceur.' },
+      { name: 'Presse à cuisses', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, xp:18, tip:'Polyarticulaire. Renforce les jambes sans charge sur le dos.' },
+      { name: 'Rowing assis poulie', sets:3, reps:'12 reps', machine:true, weighted:true, compound:true, xp:16, tip:'Polyarticulaire dos. Dos droit, tire vers le ventre.' },
+      { name: 'Gainage genoux au sol', sets:3, reps:'20 secondes', machine:false, xp:14, tip:'Version facile de la planche, genoux posés.' },
+      { name: 'Vélo — intervalles doux', cardioStep:true, dur:'12 min', intensity:'1 min actif (plus vite) / 2 min calme, à répéter', xp:24, tip:'LE vrai brûle-graisses. Alterne effort et récup. Sans douleur articulaire.' }
     ],
     cardio: null
   },
   {
-    name: 'ENDURANCE', sub: 'Cardio dominant + mobilité', xp: 100,
+    name: 'ENDURANCE', sub: 'Cardio dominant + tonus', xp: 100,
     exercises: [
-      { name: 'Marche rapide tapis', target: '15 min', machine:true, cardio:true, xp:22, tip:'Incline 3-5%, garde le souffle.' },
-      { name: 'Vélo modéré', target: '10 min', machine:true, cardio:true, xp:18, tip:'Rythme constant.' },
-      { name: 'Élévations bras avec petites haltères', target: '3 × 12', machine:false, xp:14, tip:'Tonifie le haut du corps.' },
-      { name: 'Squats sur chaise', target: '3 × 12', machine:false, xp:16, tip:'Profondeur confortable.' }
+      { name: 'Marche rapide — tapis', cardioStep:true, dur:'15 min', intensity:'Inclinaison 3-5%, garde le souffle', xp:24, tip:'Bloc principal. Tu dois transpirer mais pouvoir tenir 15 min.' },
+      { name: 'Squats sur chaise', sets:3, reps:'12 reps', machine:false, compound:true, xp:16, tip:'Profondeur confortable, contrôlé.' },
+      { name: 'Élévations bras petites haltères', sets:3, reps:'12 reps', machine:false, weighted:true, xp:14, tip:'Tonifie le haut du corps. Léger suffit.' },
+      { name: 'Vélo — retour au calme', cardioStep:true, dur:'10 min', intensity:'Rythme constant et modéré', xp:18, tip:'Termine en douceur, fais redescendre le cœur.' }
     ],
     cardio: null
   }
@@ -526,15 +587,58 @@ function getPhase(week) {
 
 function getDay(idx) {
   const k='d'+idx;
-  if(!state.days[k]) state.days[k]={ exercises:{}, cardio:false, stretches:{}, yoga:{}, hydration:0, sleep:0, nutrition:false, awarded:false };
+  if(!state.days[k]) state.days[k]={ exercises:{}, sets:{}, cardioSteps:{}, stretches:{}, yoga:{}, hydration:0, sleep:0, nutrition:false, validated:false };
   const d=state.days[k];
-  ['exercises','stretches','yoga'].forEach(f=>{ if(!d[f]) d[f]={}; });
-  if(d.cardio===undefined)d.cardio=false;
+  ['exercises','sets','cardioSteps','stretches','yoga'].forEach(f=>{ if(!d[f]) d[f]={}; });
   if(d.hydration===undefined)d.hydration=0;
   if(d.sleep===undefined)d.sleep=0;
   if(d.nutrition===undefined)d.nutrition=false;
-  if(d.awarded===undefined)d.awarded=false;
+  if(d.validated===undefined)d.validated=false;
   return d;
+}
+
+// Récupère (ou initialise) le tableau de séries d'un exercice musculaire
+function getSets(d, exIdx, nbSets) {
+  if(!d.sets[exIdx] || d.sets[exIdx].length!==nbSets){
+    const prev = d.sets[exIdx] || [];
+    const arr=[];
+    for(let s=0;s<nbSets;s++){
+      arr.push(prev[s] || { done:false, reps:'', weight:'' });
+    }
+    d.sets[exIdx]=arr;
+  }
+  return d.sets[exIdx];
+}
+
+// Un exercice musculaire est "fait" si toutes ses séries sont cochées
+function exDone(d, ex, exIdx) {
+  if(ex.cardioStep) return !!d.cardioSteps[exIdx];
+  if(!ex.sets) return !!d.exercises[exIdx]; // sécurité (gainage simple)
+  const arr=d.sets[exIdx];
+  if(!arr || arr.length!==ex.sets) return false;
+  return arr.every(s=>s.done);
+}
+
+// Retrouve le dernier poids saisi sur un exercice (par son nom) avant le jour donné.
+// Prend le poids le plus lourd parmi les séries de ce jour-là.
+function lastWeightFor(exName, beforeIdx) {
+  for(let i=beforeIdx-1;i>=0;i--){
+    const d=state.days['d'+i];
+    if(!d||!d.sets) continue;
+    const sess=sessionForDay(i);
+    if(!sess) continue;
+    for(let j=0;j<sess.exercises.length;j++){
+      if(sess.exercises[j].name===exName && d.sets[j]){
+        let maxW=null;
+        d.sets[j].forEach(s=>{
+          const w=parseFloat(s.weight);
+          if(!isNaN(w) && (maxW===null || w>maxW)) maxW=w;
+        });
+        if(maxW!==null) return maxW;
+      }
+    }
+  }
+  return null;
 }
 
 function computeStats() {
@@ -542,41 +646,49 @@ function computeStats() {
   let totalWorkouts=0, hydrationDays=0, sleepDays=0, nutritionDays=0, cardioCount=0;
   let currentStreak=0, maxStreak=0, runStreak=0;
   for(let i=0;i<TOTAL_DAYS;i++){
-    const d=state.days['d'+i]; if(!d) { runStreak=0; continue; }
-    const sess=sessionForDay(i);
-    const total=sess?sess.exercises.length:0;
-    const done=Object.values(d.exercises||{}).filter(Boolean).length;
-    const complete = total>0 && done>=total;
+    const d=state.days['d'+i]; if(!d) { if(DAY_TYPE[i%7]==='train' && i<=todayIdx) runStreak=0; continue; }
+    const complete = d.validated===true;
     if(complete){ totalWorkouts++; runStreak++; maxStreak=Math.max(maxStreak,runStreak); }
     else if(DAY_TYPE[i%7]==='train' && i<=todayIdx){ runStreak=0; }
-    if(d.cardio) cardioCount++;
+    if(d.cardioSteps) cardioCount += Object.values(d.cardioSteps).filter(Boolean).length;
     if(d.hydration>=6) hydrationDays++;
     if(d.sleep>=7) sleepDays++;
     if(d.nutrition) nutritionDays++;
   }
-  // streak courant (jours d'entraînement complets en remontant)
   for(let i=Math.min(todayIdx,TOTAL_DAYS-1);i>=0;i--){
     if(DAY_TYPE[i%7]!=='train') continue;
-    const d=state.days['d'+i]; if(!d) break;
-    const sess=sessionForDay(i); const total=sess?sess.exercises.length:0;
-    const done=Object.values(d.exercises||{}).filter(Boolean).length;
-    if(total>0 && done>=total) currentStreak++; else break;
+    const d=state.days['d'+i]; if(!d||!d.validated) break;
+    currentStreak++;
   }
   const lv=levelFromXP(state.xp);
   return { totalWorkouts, hydrationDays, sleepDays, nutritionDays, cardioCount, currentStreak, maxStreak, level:lv.level, xp:state.xp };
 }
 
-// XP award + badge check + toasts
+// XP award + badge check + toasts. amount peut être négatif (décochage).
 function awardXP(amount, label) {
   const before=levelFromXP(state.xp).level;
-  state.xp += amount;
+  state.xp = Math.max(0, state.xp + amount);
   const after=levelFromXP(state.xp).level;
-  showToast('+'+amount+' XP'+(label?' · '+label:''), 'xp');
-  if(after>before) {
-    setTimeout(()=>showToast('NIVEAU '+after+' !', 'levelup'), 400);
-  }
-  checkBadges();
+  const sign = amount>=0 ? '+' : '';
+  showToast(sign+amount+' XP'+(label?' · '+label:''), amount>=0?'xp':'xp-neg');
+  if(after>before) setTimeout(()=>showToast('NIVEAU '+after+' !', 'levelup'), 400);
+  if(amount>0) checkBadges();
   saveProfile();
+}
+
+// Validation explicite de la séance : donne le bonus, verrouille
+function validateSession(idx) {
+  const d=getDay(idx);
+  const sess=sessionForDay(idx);
+  if(!sess || d.validated) return;
+  const total=sess.exercises.length;
+  const done=Object.values(d.exercises).filter(Boolean).length;
+  if(done<total) return; // sécurité
+  d.validated=true;
+  awardXP(sess.xp, 'SÉANCE '+sess.name);
+  if(navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
+  saveProfile();
+  render();
 }
 function checkBadges() {
   const stats=computeStats();
@@ -597,20 +709,8 @@ function showToast(msg, type) {
   setTimeout(()=>{ t.style.transition='opacity 0.4s'; t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 2200);
 }
 
-// Recompute si une séance vient d'être complétée -> award XP une fois
-function maybeAwardDay(idx) {
-  const d=getDay(idx);
-  const sess=sessionForDay(idx);
-  if(!sess) return;
-  const total=sess.exercises.length;
-  const done=Object.values(d.exercises).filter(Boolean).length;
-  if(done>=total && !d.awarded) {
-    d.awarded=true;
-    awardXP(sess.xp, sess.name);
-  }
-  // Note: une fois le bonus de séance accordé, il reste acquis même si on décoche
-  // un exercice (XP "cool", jamais retiré). Le bonus n'est jamais redonné deux fois.
-}
+// La validation de séance est désormais explicite (bouton VALIDER).
+// Voir validateSession() plus bas.
 
 // ============================================================
 // RENDER : PROFILE SELECT
@@ -783,10 +883,10 @@ function renderRestDay(idx, dayLabel, date, weekNum, phase, isOff) {
 function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
   const sess=sessionForDay(idx);
   const dd=getDay(idx);
-  const done=Object.values(dd.exercises).filter(Boolean).length;
   const total=sess.exercises.length;
+  let done=0;
+  sess.exercises.forEach((ex,i)=>{ if(exDone(dd,ex,i)) done++; });
   const stretchDone=Object.values(dd.stretches||{}).filter(Boolean).length;
-  const yogaDone=Object.values(dd.yoga||{}).filter(Boolean).length;
 
   let html=`
     <div class="banner">
@@ -801,41 +901,111 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
       <div style="font-size:9px;letter-spacing:0.2em;color:var(--amber);text-transform:uppercase;margin-bottom:3px;font-weight:700;">${phase.label}</div>
       <div style="font-size:11px;color:var(--ink-dim);line-height:1.6;">${phase.tip}</div>
     </div>
-    <div class="section-label">Quête du jour <span class="count">${done}/${total}</span></div>
+    <div class="section-label">Programme du jour <span class="count">${done}/${total}</span></div>
   `;
+
   html+=sess.exercises.map((ex,i)=>{
-    const ck=dd.exercises[i]||false;
-    let tagClass = ex.cardio?'cardio':(ex.machine?'machine':'');
-    let tagText = ex.cardio?'CARDIO':(ex.machine?'MACHINE':'LIBRE');
-    return `
-      <div class="ex-item ${ck?'done':''}" data-action="ex" data-day="${idx}" data-idx="${i}">
-        <div class="ex-num">${String(i+1).padStart(2,'0')}</div>
-        <div class="ex-check"></div>
-        <div class="ex-body">
-          <div class="ex-name">${ex.name}</div>
-          <div class="ex-target"><span class="ex-tag ${tagClass}">${tagText}</span>${ex.target}</div>
-          ${ex.tip?`<div class="ex-tip">${ex.tip}</div>`:''}
+    // ---- CARDIO STEP ----
+    if(ex.cardioStep){
+      const ck=dd.cardioSteps[i]||false;
+      return `
+        <div class="cardio-step ${ck?'done':''}" data-action="cardiostep" data-day="${idx}" data-idx="${i}">
+          <div class="cardio-step-num">${String(i+1).padStart(2,'0')}</div>
+          <div>
+            <div class="cardio-step-name">${ex.name}</div>
+            <div class="cardio-step-line"><span class="cardio-step-dur">${ex.dur}</span><span class="exo-tag cardio">CARDIO</span></div>
+            <div class="cardio-step-intensity">${ex.intensity}</div>
+            ${ex.tip?`<div class="cardio-step-tip">${ex.tip}</div>`:''}
+          </div>
+          <div class="cardio-step-check"></div>
         </div>
-        <div class="ex-xp">+${ex.xp}</div>
+      `;
+    }
+
+    // ---- STRENGTH EXERCISE WITH SETS ----
+    const isDone=exDone(dd,ex,i);
+    let tagClass = ex.machine?'machine':'libre';
+    let tagText = ex.machine?'MACHINE':'POIDS LIBRE';
+    const baseTag = ex.compound?`<span class="exo-tag base">EXO DE BASE</span>`:'';
+
+    // prescription text
+    const presc = ex.sets ? `${ex.sets} séries × ${ex.reps}` : ex.reps;
+
+    let setsHtml='';
+    if(ex.sets){
+      const arr=getSets(dd, i, ex.sets);
+      const showWeight = ex.weighted;
+      setsHtml=`
+        <div class="sets">
+          <div class="set-head"><span></span><span>Reps</span><span>${showWeight?'Poids (kg)':'—'}</span><span>OK</span></div>
+          ${arr.map((s,si)=>`
+            <div class="set-row ${s.done?'done':''}">
+              <div class="set-idx">S${si+1}</div>
+              <input class="set-input" type="number" inputmode="numeric" placeholder="${ex.reps.replace(/[^0-9]/g,'')||'—'}" value="${s.reps}" data-action="set-reps" data-day="${idx}" data-ex="${i}" data-set="${si}" />
+              ${showWeight
+                ? `<input class="set-input" type="number" inputmode="decimal" step="0.5" placeholder="0" value="${s.weight}" data-action="set-weight" data-day="${idx}" data-ex="${i}" data-set="${si}" />`
+                : `<input class="set-input cardio-na" value="poids du corps" disabled />`}
+              <div class="set-check" data-action="set-toggle" data-day="${idx}" data-ex="${i}" data-set="${si}"></div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // last weight hint
+    let prevHtml='';
+    if(ex.weighted){
+      const prev=lastWeightFor(ex.name, idx);
+      const arr=getSets(dd,i,ex.sets);
+      let curMax=null; arr.forEach(s=>{const w=parseFloat(s.weight); if(!isNaN(w)&&(curMax===null||w>curMax))curMax=w;});
+      if(prev!=null){
+        if(curMax!=null){
+          const diff=curMax-prev;
+          if(diff>0) prevHtml=`<div class="exo-prev"><span class="up">↑ +${diff}kg vs dernière séance (${prev}kg)</span></div>`;
+          else if(diff<0) prevHtml=`<div class="exo-prev"><span class="down">↓ ${diff}kg vs dernière séance (${prev}kg)</span></div>`;
+          else prevHtml=`<div class="exo-prev"><span class="same">= même charge que la dernière fois (${prev}kg)</span></div>`;
+        } else {
+          prevHtml=`<div class="exo-prev">Dernière séance : <strong>${prev}kg</strong> — essaie de faire au moins pareil</div>`;
+        }
+      } else {
+        prevHtml=`<div class="exo-prev">Première fois sur cet exo — note la charge que tu utilises</div>`;
+      }
+    }
+
+    return `
+      <div class="exo ${isDone?'done':''}">
+        <div class="exo-head">
+          <div class="exo-num">${String(i+1).padStart(2,'0')}</div>
+          <div class="exo-info">
+            <div class="exo-name">${ex.name}</div>
+            <div class="exo-meta">${baseTag}<span class="exo-tag ${tagClass}">${tagText}</span><span class="exo-prescription">${presc}</span></div>
+          </div>
+          <div class="exo-xp">+${ex.xp}</div>
+        </div>
+        ${ex.tip?`<div class="exo-tip">${ex.tip}</div>`:''}
+        ${prevHtml}
+        ${setsHtml}
       </div>
     `;
   }).join('');
 
-  if(sess.cardio){
-    html+=`<div class="section-label cardio">Cardio bonus</div>`;
-    html+=`<div class="ex-item ${dd.cardio?'done':''}" data-action="cardio" data-day="${idx}" style="grid-template-columns:28px 24px 1fr auto;">
-      <div class="ex-num" style="color:var(--orange);">+</div>
-      <div class="ex-check"></div>
-      <div class="ex-body"><div class="ex-name">${sess.cardio.name}</div><div class="ex-target"><span class="ex-tag cardio">CARDIO</span>${sess.cardio.detail}</div></div>
-      <div class="ex-xp">+${sess.cardio.xp}</div>
-    </div>`;
+  // VALIDATION DE SÉANCE
+  const allDone = done>=total;
+  html+=`<div class="validate-zone">`;
+  if(dd.validated){
+    html+=`<div class="validate-done">✓ SÉANCE VALIDÉE<span class="vd-sub">+${sess.xp} XP bonus encaissés</span></div>`;
+  } else if(allDone){
+    html+=`<button class="validate-btn" data-action="validate" data-day="${idx}">VALIDER LA SÉANCE<span class="vb-sub">Encaisse +${sess.xp} XP de bonus</span></button>`;
+  } else {
+    html+=`<button class="validate-btn" disabled>VALIDER LA SÉANCE<span class="vb-sub">Termine les ${total} exercices d'abord · ${done}/${total} fait${done>1?'s':''}</span></button>`;
   }
+  html+=`</div>`;
 
   // Rest timer
   html+=`
     <div class="section-label">Chrono repos</div>
     <div class="rest-timer">
-      <div class="rest-timer-label">// REST TIMER</div>
+      <div class="rest-timer-label">// MINUTEUR ENTRE SÉRIES</div>
       <div class="rest-timer-display ${restTimer.running?'running':''}" id="timer-display">${formatTimer(restTimer.seconds)}</div>
       <div class="rest-timer-btns">
         <button class="rest-timer-btn" data-timer="60">60s</button>
@@ -857,9 +1027,9 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
 
 function renderVitals(idx, dd) {
   return `
-    <div class="section-label">Vitals <span class="count">+XP quotidien</span></div>
+    <div class="section-label">Suivi du jour <span class="count">sommeil & nutrition = +XP</span></div>
     <div class="hydration">
-      <div class="hydration-header"><div class="hydration-label">// HYDRATATION · +1 XP/verre</div><div class="hydration-count">${dd.hydration}/8</div></div>
+      <div class="hydration-header"><div class="hydration-label">// HYDRATATION</div><div class="hydration-count">${dd.hydration}/8</div></div>
       <div class="hydration-glasses">${[1,2,3,4,5,6,7,8].map(n=>`<div class="glass ${n<=dd.hydration?'full':''}" data-action="hydration" data-day="${idx}" data-val="${n}"></div>`).join('')}</div>
     </div>
     <div class="sleep-input">
@@ -889,10 +1059,11 @@ function renderWeek(todayIdx) {
       const dt=DAY_TYPE[i];
       const sess=sessionForDay(dayIdx);
       const dd=state.days['d'+dayIdx];
-      const done=dd?Object.values(dd.exercises||{}).filter(Boolean).length:0;
       const total=sess?sess.exercises.length:0;
+      let done=0;
+      if(dd&&sess) sess.exercises.forEach((ex,ei)=>{ if(exDone(dd,ex,ei)) done++; });
       const isToday=dayIdx===todayIdx;
-      const complete=total>0 && done>=total;
+      const complete=dd&&dd.validated===true;
       let cls='day-card'; if(isToday)cls+=' today'; if(complete)cls+=' complete'; if(dt!=='train')cls+=' rest-day';
       let title, stat;
       if(dt==='off'){ title='Off · Repos total'; stat='—'; }
@@ -916,9 +1087,7 @@ function renderStats(todayIdx) {
   let weekDone=0;
   for(let i=weekStart;i<weekStart+7;i++){
     const dd=state.days['d'+i]; if(!dd)continue;
-    const sess=sessionForDay(i); const total=sess?sess.exercises.length:0;
-    const done=Object.values(dd.exercises||{}).filter(Boolean).length;
-    if(total>0 && done>=total) weekDone++;
+    if(dd.validated===true) weekDone++;
   }
   const goalPct=Math.min(100,Math.round((weekDone/p.weeklyGoal)*100));
 
@@ -949,6 +1118,8 @@ function renderStats(todayIdx) {
     </div>
 
     <button class="btn btn-danger" data-action="reset" style="margin-top:18px;">// RESET CE PROFIL</button>
+    <button class="btn btn-danger" data-action="reset-all">// RESET TOTAL · TOUS LES PROFILS</button>
+    <p style="font-size:10px;color:var(--ink-faint);text-align:center;line-height:1.5;margin-top:2px;">Reset profil = efface ta progression seule.<br>Reset total = remet tout à zéro pour les 2 profils.</p>
   `;
 }
 
@@ -972,8 +1143,16 @@ function renderGuide() {
       </div>
     `).join('')}
     <div class="guide-block">
+      <h3>// EXOS DE BASE D'ABORD</h3>
+      <p>Chaque séance commence par les exercices polyarticulaires (marqués EXO DE BASE) : développé, presse, tirage, rowing, squat. Ils travaillent plusieurs muscles à la fois, c'est ce qui construit le plus de force et de masse. L'isolation (curls, élévations) vient après.</p>
+    </div>
+    <div class="guide-block">
+      <h3>// SÉRIES & RÉPÉTITIONS</h3>
+      <p>Pour chaque exo, note tes reps et ton poids série par série. Tu peux faire dégressif (baisser la charge à chaque série) ou garder le même poids. Coche chaque série une fois faite. Le rappel "dernière séance" affiche ta charge précédente : vise au moins pareil, idéalement plus. C'est la surcharge progressive.</p>
+    </div>
+    <div class="guide-block">
       <h3>// SYSTÈME XP</h3>
-      <p>Chaque exo coché rapporte de l'XP. Finir une séance complète donne un bonus. Hydratation, sommeil, nutrition et mobilité rapportent aussi. Monte les niveaux, débloque les badges.</p>
+      <p>Chaque série cochée rapporte de l'XP. Terminer toutes les séries valide l'exo ; valider la séance complète donne un gros bonus. Sommeil, nutrition et mobilité rapportent aussi. L'hydratation est un simple suivi sans XP. Monte les niveaux, débloque les badges.</p>
     </div>
     <div class="guide-block">
       <h3>// PHASES</h3>
@@ -1000,21 +1179,52 @@ function attachListeners() {
   document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{
     currentView=el.dataset.tab; if(currentView!=='week')state.viewWeek=null; render();
   }));
-  document.querySelectorAll('[data-action="ex"]').forEach(el=>el.addEventListener('click',(e)=>{
-    e.preventDefault();
-    const idx=parseInt(el.dataset.day), i=el.dataset.idx;
-    const d=getDay(idx);
-    const sess=sessionForDay(idx);
-    const wasDone=d.exercises[i]||false;
-    d.exercises[i]=!wasDone;
-    if(!wasDone){ const ex=sess.exercises[i]; awardXP(ex.xp); }
-    maybeAwardDay(idx);
+  // Cocher une série : XP symétrique. Le bonus de séance se déclenche à la validation.
+  document.querySelectorAll('[data-action="set-toggle"]').forEach(el=>el.addEventListener('click',()=>{
+    const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
+    const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[exi];
+    const arr=getSets(d, exi, ex.sets);
+    const was=arr[si].done;
+    arr[si].done=!was;
+    // XP par série = xp de l'exo réparti sur ses séries
+    const perSet=Math.max(1, Math.round(ex.xp/ex.sets));
+    awardXP(was ? -perSet : perSet);
+    if(was && d.validated){ d.validated=false; awardXP(-sess.xp,'Séance annulée'); }
     saveProfile(); render();
   }));
-  document.querySelectorAll('[data-action="cardio"]').forEach(el=>el.addEventListener('click',()=>{
-    const idx=parseInt(el.dataset.day); const d=getDay(idx); const sess=sessionForDay(idx);
-    const was=d.cardio; d.cardio=!was;
-    if(!was && sess.cardio) awardXP(sess.cardio.xp,'Cardio');
+  // Saisie reps par série
+  document.querySelectorAll('[data-action="set-reps"]').forEach(el=>{
+    el.addEventListener('click',(e)=>e.stopPropagation());
+    el.addEventListener('change',(e)=>{
+      const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
+      const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[exi];
+      const arr=getSets(d, exi, ex.sets);
+      arr[si].reps=e.target.value; saveProfile();
+    });
+  });
+  // Saisie poids par série
+  document.querySelectorAll('[data-action="set-weight"]').forEach(el=>{
+    el.addEventListener('click',(e)=>e.stopPropagation());
+    el.addEventListener('change',(e)=>{
+      const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
+      const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[exi];
+      const arr=getSets(d, exi, ex.sets);
+      arr[si].weight=e.target.value; saveProfile(); render(); // render pour MAJ le rappel de charge
+    });
+  });
+
+  // Validation de séance
+  document.querySelectorAll('[data-action="validate"]').forEach(el=>el.addEventListener('click',()=>{
+    validateSession(parseInt(el.dataset.day));
+  }));
+
+  // Étape cardio (cochage simple, XP symétrique)
+  document.querySelectorAll('[data-action="cardiostep"]').forEach(el=>el.addEventListener('click',()=>{
+    const idx=parseInt(el.dataset.day), i=parseInt(el.dataset.idx);
+    const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[i];
+    const was=d.cardioSteps[i]||false; d.cardioSteps[i]=!was;
+    awardXP(was ? -ex.xp : ex.xp, 'Cardio');
+    if(was && d.validated){ d.validated=false; awardXP(-sess.xp,'Séance annulée'); }
     saveProfile(); render();
   }));
   document.querySelectorAll('[data-action="stretch"]').forEach(el=>el.addEventListener('click',()=>{
@@ -1022,6 +1232,7 @@ function attachListeners() {
     const was=d.stretches[i]||false; d.stretches[i]=!was;
     const allDone=Object.values(d.stretches).filter(Boolean).length===STRETCHES.length;
     if(allDone && !d.stretchAwarded){ d.stretchAwarded=true; awardXP(15,'Étirements'); }
+    else if(!allDone && d.stretchAwarded){ d.stretchAwarded=false; awardXP(-15,'Étirements'); }
     saveProfile(); render();
   }));
   document.querySelectorAll('[data-action="yoga"]').forEach(el=>el.addEventListener('click',()=>{
@@ -1029,13 +1240,13 @@ function attachListeners() {
     const was=d.yoga[i]||false; d.yoga[i]=!was;
     const allDone=Object.values(d.yoga).filter(Boolean).length===YOGA.length;
     if(allDone && !d.yogaAwarded){ d.yogaAwarded=true; awardXP(20,'Yoga'); }
+    else if(!allDone && d.yogaAwarded){ d.yogaAwarded=false; awardXP(-20,'Yoga'); }
     saveProfile(); render();
   }));
+  // Hydratation : simple suivi, AUCUN XP (on boit déjà assez)
   document.querySelectorAll('[data-action="hydration"]').forEach(el=>el.addEventListener('click',()=>{
     const idx=parseInt(el.dataset.day), v=parseInt(el.dataset.val); const d=getDay(idx);
-    const old=d.hydration;
     d.hydration = d.hydration===v ? v-1 : v;
-    if(d.hydration>old) awardXP(d.hydration-old);
     saveProfile(); render();
   }));
   document.querySelectorAll('[data-action="sleep"]').forEach(el=>{
@@ -1051,7 +1262,7 @@ function attachListeners() {
   });
   document.querySelectorAll('[data-action="nutrition"]').forEach(el=>el.addEventListener('click',()=>{
     const idx=parseInt(el.dataset.day); const d=getDay(idx); const was=d.nutrition; d.nutrition=!was;
-    if(!was) awardXP(15,'Nutrition');
+    awardXP(was ? -15 : 15,'Nutrition');
     saveProfile(); render();
   }));
   document.querySelectorAll('[data-toggle]').forEach(el=>el.addEventListener('click',()=>{ openSections[el.dataset.toggle]=!openSections[el.dataset.toggle]; render(); }));
@@ -1061,6 +1272,18 @@ function attachListeners() {
   const reset=document.querySelector('[data-action="reset"]'); if(reset)reset.addEventListener('click',()=>{
     if(confirm('// RESET CE PROFIL ? XP, badges et progression seront effacés.')){
       state={days:{},xp:0,unlockedBadges:[]}; saveProfile(); render();
+    }
+  });
+  const resetAll=document.querySelector('[data-action="reset-all"]'); if(resetAll)resetAll.addEventListener('click',()=>{
+    if(confirm('// RESET TOTAL ? La progression des DEUX profils sera entièrement effacée. Action irréversible.')){
+      if(confirm('Es-tu vraiment sûr ? Tout sera remis à zéro.')){
+        // Efface toutes les clés de l'app
+        Object.keys(localStorage).forEach(k=>{ if(k.indexOf(STORE_PREFIX)===0) localStorage.removeItem(k); });
+        localStorage.removeItem('ascend_install_dismissed');
+        stopTimer();
+        activeProfile=null; state=null;
+        renderProfileSelect();
+      }
     }
   });
 }
