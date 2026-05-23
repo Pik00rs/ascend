@@ -481,6 +481,13 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .preview-exit:active { transform:scale(0.92); }
 .test-launch { width:100%; padding:13px; margin-top:10px; background:var(--bg-2); border:1px dashed var(--gold); color:var(--gold); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; font-weight:700; cursor:pointer; border-radius:4px; }
 .test-launch:active { transform:scale(0.99); }
+.test-intro { font-size:11px; color:var(--ink-dim); line-height:1.6; padding:12px 14px; background:var(--bg-2); border:1px solid var(--border); border-left:2px solid var(--gold); border-radius:4px; margin-bottom:16px; }
+.catalogue-session { margin-bottom:24px; }
+.catalogue-header { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; padding:10px 12px; margin-bottom:10px; background:linear-gradient(135deg, rgba(5,242,219,0.06), transparent); border:1px solid var(--accent-dim); border-radius:6px; }
+.catalogue-tag { font-family:'Orbitron',monospace; font-size:9px; font-weight:700; letter-spacing:0.12em; color:var(--bg); background:var(--accent); padding:3px 7px; border-radius:3px; }
+.catalogue-tag.stretch { background:var(--magenta); }
+.catalogue-name { font-family:'Orbitron',monospace; font-size:15px; font-weight:700; color:var(--accent); }
+.catalogue-sub { font-size:10px; color:var(--ink-dim); letter-spacing:0.05em; }
 input:focus { outline:none; }
 ::selection { background:var(--magenta); color:var(--bg); }
 </style>
@@ -496,7 +503,7 @@ input:focus { outline:none; }
 // >>> NUMÉRO DE VERSION <<<
 // À INCRÉMENTER À CHAQUE FOIS QUE TU DÉPLOIES UNE NOUVELLE VERSION SUR GITHUB.
 // L'app compare ce numéro à celui de version.json et propose la mise à jour.
-const APP_VERSION = 12;
+const APP_VERSION = 13;
 
 const TOTAL_DAYS = 42;
 const STORE_PREFIX = 'ascend_v1_';
@@ -632,7 +639,6 @@ const PROFILES = {
     intel: {
       title:'PRISE DE MASSE',
       blocks:[
-        { h:'// NUTRITION', p:'Tu es en sous-poids. Sans surplus calorique, pas de muscle.', ul:['2800–3000 kcal/jour','110–140g de protéines','Collation post-séance dans l\'heure','Œufs, poulet, riz, lait entier, avoine'] },
         { h:'// SURCHARGE', p:'Monte la charge dès que tu atteins le haut de la fourchette de reps. C\'est la règle qui fait grossir le muscle.' },
         { h:'// REPOS', p:'Un jour sur deux. Le muscle grossit pendant la récup, pas pendant la séance. 8h de sommeil.' }
       ]
@@ -646,7 +652,6 @@ const PROFILES = {
     intel: {
       title:'PERTE DE POIDS',
       blocks:[
-        { h:'// LE PRINCIPE', p:'La perte de poids se joue à 80% dans l\'assiette. Le sport accélère et tonifie, mais l\'alimentation est le levier principal.', ul:['Déficit calorique léger et tenable','Plus de protéines (rassasie, garde le muscle)','Moins de sucres rapides et sodas','Bois beaucoup d\'eau (1.5-2L)'] },
         { h:'// POURQUOI SANS IMPACT', p:'À 110kg, courir ou sauter abîme les genoux. Vélo, marche, machines guidées : tu brûles autant sans te blesser.' },
         { h:'// RYTHME DOUX', p:'Un jour sur deux suffit largement au début. La régularité bat l\'intensité. Mieux vaut 3 séances tenues que 6 abandonnées.' },
         { h:'// PATIENCE', p:'Vise 0.5-1kg/semaine. Lent = durable. Les régimes brutaux échouent. Tu construis une habitude pour la vie.' }
@@ -659,7 +664,7 @@ const BADGES = [
   { id:'first', icon:'I', name:'Premier pas', check:(s)=>s.totalWorkouts>=1 },
   { id:'streak3', icon:'III', name:'Série de 3', check:(s)=>s.maxStreak>=3 },
   { id:'week1', icon:'W1', name:'Semaine 1', check:(s)=>s.totalWorkouts>=3 },
-  { id:'hydro', icon:'NUT', name:'Nutrition x5', check:(s)=>s.nutritionDays>=5 },
+  { id:'hydro', icon:'VI', name:'6 séances', check:(s)=>s.totalWorkouts>=6 },
   { id:'lvl5', icon:'L5', name:'Niveau 5', check:(s)=>s.level>=5 },
   { id:'half', icon:'½', name:'Mi-parcours', check:(s)=>s.totalWorkouts>=9 },
   { id:'sleep', icon:'Zzz', name:'Bon dormeur', check:(s)=>s.sleepDays>=7 },
@@ -1176,13 +1181,18 @@ function getPhase(week) {
   return p.phases.find(ph=>ph.weeks.includes(week)) || p.phases[0];
 }
 
+// Comme sessionForDay mais gère aussi les index "sandbox" du catalogue de test (900+).
+function sessionForCard(idx){
+  if(idx>=900 && idx<950){ return getProfile().sessions[idx-900] || null; }
+  return sessionForDay(idx);
+}
+
 function getDay(idx) {
   const k='d'+idx;
-  if(!state.days[k]) state.days[k]={ exercises:{}, sets:{}, cardioSteps:{}, stretches:{}, yoga:{}, sleep:0, nutrition:false, validated:false };
+  if(!state.days[k]) state.days[k]={ exercises:{}, sets:{}, cardioSteps:{}, stretches:{}, yoga:{}, sleep:0, validated:false };
   const d=state.days[k];
   ['exercises','sets','cardioSteps','stretches','yoga'].forEach(f=>{ if(!d[f]) d[f]={}; });
   if(d.sleep===undefined)d.sleep=0;
-  if(d.nutrition===undefined)d.nutrition=false;
   if(d.validated===undefined)d.validated=false;
   return d;
 }
@@ -1233,7 +1243,7 @@ function lastWeightFor(exName, beforeIdx) {
 
 function computeStats() {
   const todayIdx=getDayIndex();
-  let totalWorkouts=0, sleepDays=0, nutritionDays=0, cardioCount=0;
+  let totalWorkouts=0, sleepDays=0, cardioCount=0;
   let currentStreak=0, maxStreak=0, runStreak=0;
   for(let i=0;i<TOTAL_DAYS;i++){
     const d=state.days['d'+i]; if(!d) { if(dayTypeForDay(i)==='train' && i<=todayIdx) runStreak=0; continue; }
@@ -1242,7 +1252,6 @@ function computeStats() {
     else if(dayTypeForDay(i)==='train' && i<=todayIdx){ runStreak=0; }
     if(d.cardioSteps) cardioCount += Object.values(d.cardioSteps).filter(Boolean).length;
     if(d.sleep>=7) sleepDays++;
-    if(d.nutrition) nutritionDays++;
   }
   for(let i=Math.min(todayIdx,TOTAL_DAYS-1);i>=0;i--){
     if(dayTypeForDay(i)!=='train') continue;
@@ -1250,7 +1259,7 @@ function computeStats() {
     currentStreak++;
   }
   const lv=levelFromXP(state.xp);
-  return { totalWorkouts, sleepDays, nutritionDays, cardioCount, currentStreak, maxStreak, level:lv.level, xp:state.xp };
+  return { totalWorkouts, sleepDays, cardioCount, currentStreak, maxStreak, level:lv.level, xp:state.xp };
 }
 
 // XP award + badge check + toasts. amount peut être négatif (décochage).
@@ -1358,8 +1367,7 @@ function render() {
   const p=getProfile();
   document.body.className=p.bodyClass;
   const realIdx=getDayIndex();
-  // En mode aperçu, la "Quête" affiche le jour choisi au lieu d'aujourd'hui
-  const todayIdx = (previewDay!==null && currentView==='today') ? previewDay : realIdx;
+  const testMode = (previewDay!==null && currentView==='today');
   const lv=levelFromXP(state.xp);
   const xpPct = Math.round((lv.current/lv.needed)*100);
 
@@ -1368,7 +1376,8 @@ function render() {
   else if(realIdx>=TOTAL_DAYS) statusLine='COMPLETE';
   else statusLine='J'+(realIdx+1)+'/'+TOTAL_DAYS;
 
-  const previewBar = (previewDay!==null && currentView==='today') ? renderPreviewBar() : '';
+  const previewBar = testMode ? renderPreviewBar() : '';
+  const content = testMode ? renderTestCatalogue() : renderContent(realIdx);
 
   document.getElementById('app').innerHTML=`
     <header class="hud">
@@ -1394,27 +1403,64 @@ function render() {
       <button class="tab ${currentView==='guide'?'active':''}" data-tab="guide">Intel</button>
     </nav>
     ${previewBar}
-    <div class="view-content">${renderContent(todayIdx)}</div>
+    <div class="view-content">${content}</div>
   `;
   attachListeners();
   updateTimerDisplay();
 }
 
 function renderPreviewBar(){
-  const d=dateForDay(previewDay);
-  const dt=dayTypeForDay(previewDay);
-  const typeLabel = dt==='train'?'SPORT':(dt==='off'?'REPOS':'ÉTIREMENTS');
   return `
     <div class="preview-bar">
-      <button class="preview-nav" data-action="preview-prev" ${previewDay<=0?'disabled':''}>◂</button>
       <div class="preview-info">
-        <div class="preview-label">MODE TEST · APERÇU</div>
-        <div class="preview-day">J${previewDay+1} · ${WEEKDAY_FR[weekdayForDay(previewDay)]} ${fmtDate(d)} · ${typeLabel}</div>
+        <div class="preview-label">MODE TEST · TOUS LES EXERCICES</div>
+        <div class="preview-day">Aperçu complet · les coches ici ne comptent pas</div>
       </div>
-      <button class="preview-nav" data-action="preview-next" ${previewDay>=TOTAL_DAYS-1?'disabled':''}>▸</button>
       <button class="preview-exit" data-action="preview-exit">✕</button>
     </div>
   `;
+}
+
+// Catalogue complet : toutes les séances sport + étirements + yoga, présentés comme en daily.
+// On utilise des index "sandbox" (900+) pour que les coches de test n'affectent pas la vraie progression.
+function renderTestCatalogue(){
+  const p=getProfile();
+  let html=`<div class="test-intro">Voici tous les exercices du programme, exactement comme ils apparaissent au quotidien. C'est une zone de test : ce que tu coches ici n'affecte pas ta progression réelle.</div>`;
+
+  p.sessions.forEach((sess,si)=>{
+    const sandboxIdx = 900 + si; // jour fictif dédié au test
+    const dd=getDay(sandboxIdx);
+    html+=`
+      <div class="catalogue-session">
+        <div class="catalogue-header">
+          <span class="catalogue-tag">SÉANCE ${si+1}/${p.sessions.length}</span>
+          <span class="catalogue-name">${sess.name}</span>
+          <span class="catalogue-sub">${sess.sub}</span>
+        </div>
+        ${sess.exercises.map((ex,i)=>renderExerciseCard(ex,i,dd,sandboxIdx)).join('')}
+      </div>
+    `;
+  });
+
+  // Étirements
+  const stretchSandbox=950;
+  const sdd=getDay(stretchSandbox);
+  html+=`
+    <div class="catalogue-session">
+      <div class="catalogue-header"><span class="catalogue-tag stretch">ÉTIREMENTS</span><span class="catalogue-name">Souplesse</span><span class="catalogue-sub">Jours mar / ven / dim</span></div>
+      ${renderRoutineList(STRETCHES,'stretch',stretchSandbox,sdd.stretches)}
+    </div>
+  `;
+  // Yoga
+  const yogaSandbox=951;
+  const ydd=getDay(yogaSandbox);
+  html+=`
+    <div class="catalogue-session">
+      <div class="catalogue-header"><span class="catalogue-tag stretch">YOGA</span><span class="catalogue-name">Routine 15 min</span><span class="catalogue-sub">Détente & mobilité</span></div>
+      ${renderRoutineList(YOGA,'yoga',yogaSandbox,ydd.yoga)}
+    </div>
+  `;
+  return html;
 }
 
 function renderContent(todayIdx) {
@@ -1493,6 +1539,90 @@ function renderRestDay(idx, dayLabel, date, weekNum, phase, isOff) {
   `;
 }
 
+// Carte d'un exercice (cardio step ou muscu avec séries), telle qu'affichée en daily.
+function renderExerciseCard(ex, i, dd, idx){
+  // ---- CARDIO STEP ----
+  if(ex.cardioStep){
+    const ck=dd.cardioSteps[i]||false;
+    return `
+      <div class="cardio-step ${ck?'done':''}" data-action="cardiostep" data-day="${idx}" data-idx="${i}">
+        <div class="cardio-step-num">${String(i+1).padStart(2,'0')}</div>
+        <div>
+          <div class="cardio-step-name">${ex.name}</div>
+          <div class="cardio-step-line"><span class="cardio-step-dur">${ex.dur}</span><span class="exo-tag cardio">CARDIO</span></div>
+          <div class="cardio-step-intensity">${ex.intensity}</div>
+          ${ex.tip?`<div class="cardio-step-tip">${ex.tip}</div>`:''}
+          ${vizBlock(ex,{stop:true,forceMachine:true})}
+        </div>
+        <div class="cardio-step-check"></div>
+      </div>
+    `;
+  }
+  // ---- MUSCU AVEC SÉRIES ----
+  const isDone=exDone(dd,ex,i);
+  const tagClass = ex.machine?'machine':'libre';
+  const tagText = ex.machine?'MACHINE':'POIDS LIBRE';
+  const baseTag = ex.compound?`<span class="exo-tag base">EXO DE BASE</span>`:'';
+  const presc = ex.sets ? `${ex.sets} séries × ${ex.reps}` : ex.reps;
+
+  let setsHtml='';
+  if(ex.sets){
+    const arr=getSets(dd, i, ex.sets);
+    const showWeight = ex.weighted;
+    setsHtml=`
+      <div class="sets">
+        <div class="set-head"><span></span><span>Reps</span><span>${showWeight?'Poids (kg)':'—'}</span><span>OK</span></div>
+        ${arr.map((s,si)=>`
+          <div class="set-row ${s.done?'done':''}">
+            <div class="set-idx">S${si+1}</div>
+            <input class="set-input" type="number" inputmode="numeric" placeholder="${ex.reps.replace(/[^0-9]/g,'')||'—'}" value="${s.reps}" data-action="set-reps" data-day="${idx}" data-ex="${i}" data-set="${si}" />
+            ${showWeight
+              ? `<input class="set-input" type="number" inputmode="decimal" step="0.5" placeholder="0" value="${s.weight}" data-action="set-weight" data-day="${idx}" data-ex="${i}" data-set="${si}" />`
+              : `<input class="set-input cardio-na" value="poids du corps" disabled />`}
+            <div class="set-check" data-action="set-toggle" data-day="${idx}" data-ex="${i}" data-set="${si}"></div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  let prevHtml='';
+  if(ex.weighted){
+    const prev=lastWeightFor(ex.name, idx);
+    const arr=getSets(dd,i,ex.sets);
+    let curMax=null; arr.forEach(s=>{const w=parseFloat(s.weight); if(!isNaN(w)&&(curMax===null||w>curMax))curMax=w;});
+    if(prev!=null){
+      if(curMax!=null){
+        const diff=curMax-prev;
+        if(diff>0) prevHtml=`<div class="exo-prev"><span class="up">↑ +${diff}kg vs dernière séance (${prev}kg)</span></div>`;
+        else if(diff<0) prevHtml=`<div class="exo-prev"><span class="down">↓ ${diff}kg vs dernière séance (${prev}kg)</span></div>`;
+        else prevHtml=`<div class="exo-prev"><span class="same">= même charge que la dernière fois (${prev}kg)</span></div>`;
+      } else {
+        prevHtml=`<div class="exo-prev">Dernière séance : <strong>${prev}kg</strong> — essaie de faire au moins pareil</div>`;
+      }
+    } else {
+      prevHtml=`<div class="exo-prev">Première fois sur cet exo — note la charge que tu utilises</div>`;
+    }
+  }
+
+  return `
+    <div class="exo ${isDone?'done':''}">
+      <div class="exo-head">
+        <div class="exo-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="exo-info">
+          <div class="exo-name">${ex.name}</div>
+          <div class="exo-meta">${baseTag}<span class="exo-tag ${tagClass}">${tagText}</span><span class="exo-prescription">${presc}</span></div>
+        </div>
+        <div class="exo-xp">+${ex.xp}</div>
+      </div>
+      ${ex.tip?`<div class="exo-tip">${ex.tip}</div>`:''}
+      ${vizBlock(ex)}
+      ${prevHtml}
+      ${setsHtml}
+    </div>
+  `;
+}
+
 function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
   const sess=sessionForDay(idx);
   const dd=getDay(idx);
@@ -1517,92 +1647,7 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
     <div class="section-label">Programme du jour <span class="count">${done}/${total}</span></div>
   `;
 
-  html+=sess.exercises.map((ex,i)=>{
-    // ---- CARDIO STEP ----
-    if(ex.cardioStep){
-      const ck=dd.cardioSteps[i]||false;
-      return `
-        <div class="cardio-step ${ck?'done':''}" data-action="cardiostep" data-day="${idx}" data-idx="${i}">
-          <div class="cardio-step-num">${String(i+1).padStart(2,'0')}</div>
-          <div>
-            <div class="cardio-step-name">${ex.name}</div>
-            <div class="cardio-step-line"><span class="cardio-step-dur">${ex.dur}</span><span class="exo-tag cardio">CARDIO</span></div>
-            <div class="cardio-step-intensity">${ex.intensity}</div>
-            ${ex.tip?`<div class="cardio-step-tip">${ex.tip}</div>`:''}
-            ${vizBlock(ex,{stop:true,forceMachine:true})}
-          </div>
-          <div class="cardio-step-check"></div>
-        </div>
-      `;
-    }
-
-    // ---- STRENGTH EXERCISE WITH SETS ----
-    const isDone=exDone(dd,ex,i);
-    let tagClass = ex.machine?'machine':'libre';
-    let tagText = ex.machine?'MACHINE':'POIDS LIBRE';
-    const baseTag = ex.compound?`<span class="exo-tag base">EXO DE BASE</span>`:'';
-
-    // prescription text
-    const presc = ex.sets ? `${ex.sets} séries × ${ex.reps}` : ex.reps;
-
-    let setsHtml='';
-    if(ex.sets){
-      const arr=getSets(dd, i, ex.sets);
-      const showWeight = ex.weighted;
-      setsHtml=`
-        <div class="sets">
-          <div class="set-head"><span></span><span>Reps</span><span>${showWeight?'Poids (kg)':'—'}</span><span>OK</span></div>
-          ${arr.map((s,si)=>`
-            <div class="set-row ${s.done?'done':''}">
-              <div class="set-idx">S${si+1}</div>
-              <input class="set-input" type="number" inputmode="numeric" placeholder="${ex.reps.replace(/[^0-9]/g,'')||'—'}" value="${s.reps}" data-action="set-reps" data-day="${idx}" data-ex="${i}" data-set="${si}" />
-              ${showWeight
-                ? `<input class="set-input" type="number" inputmode="decimal" step="0.5" placeholder="0" value="${s.weight}" data-action="set-weight" data-day="${idx}" data-ex="${i}" data-set="${si}" />`
-                : `<input class="set-input cardio-na" value="poids du corps" disabled />`}
-              <div class="set-check" data-action="set-toggle" data-day="${idx}" data-ex="${i}" data-set="${si}"></div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    // last weight hint
-    let prevHtml='';
-    if(ex.weighted){
-      const prev=lastWeightFor(ex.name, idx);
-      const arr=getSets(dd,i,ex.sets);
-      let curMax=null; arr.forEach(s=>{const w=parseFloat(s.weight); if(!isNaN(w)&&(curMax===null||w>curMax))curMax=w;});
-      if(prev!=null){
-        if(curMax!=null){
-          const diff=curMax-prev;
-          if(diff>0) prevHtml=`<div class="exo-prev"><span class="up">↑ +${diff}kg vs dernière séance (${prev}kg)</span></div>`;
-          else if(diff<0) prevHtml=`<div class="exo-prev"><span class="down">↓ ${diff}kg vs dernière séance (${prev}kg)</span></div>`;
-          else prevHtml=`<div class="exo-prev"><span class="same">= même charge que la dernière fois (${prev}kg)</span></div>`;
-        } else {
-          prevHtml=`<div class="exo-prev">Dernière séance : <strong>${prev}kg</strong> — essaie de faire au moins pareil</div>`;
-        }
-      } else {
-        prevHtml=`<div class="exo-prev">Première fois sur cet exo — note la charge que tu utilises</div>`;
-      }
-    }
-
-    return `
-      <div class="exo ${isDone?'done':''}">
-        <div class="exo-head">
-          <div class="exo-num">${String(i+1).padStart(2,'0')}</div>
-          <div class="exo-info">
-            <div class="exo-name">${ex.name}</div>
-            <div class="exo-meta">${baseTag}<span class="exo-tag ${tagClass}">${tagText}</span><span class="exo-prescription">${presc}</span></div>
-          </div>
-          <div class="exo-xp">+${ex.xp}</div>
-        </div>
-        ${ex.tip?`<div class="exo-tip">${ex.tip}</div>`:''}
-        ${vizBlock(ex)}
-        ${prevHtml}
-        ${setsHtml}
-      </div>
-    `;
-  }).join('');
+  html+=sess.exercises.map((ex,i)=>renderExerciseCard(ex,i,dd,idx)).join('');
 
   // VALIDATION DE SÉANCE
   const allDone = done>=total;
@@ -1649,11 +1694,6 @@ function renderVitals(idx, dd) {
       <div class="sleep-label">// SOMMEIL</div>
       <div class="sleep-row"><input type="range" min="0" max="12" step="0.5" value="${dd.sleep}" data-action="sleep" data-day="${idx}" /><div class="sleep-value" id="sleep-val-${idx}">${dd.sleep}<span style="font-size:11px;">h</span></div></div>
       <div class="sleep-hint">Cible 8h · Bonus +10 XP si ≥7h</div>
-    </div>
-    <div class="metric ${dd.nutrition?'on':''}" data-action="nutrition" data-day="${idx}">
-      <div class="metric-label">// NUTRITION · +15 XP</div>
-      <div class="metric-value">${dd.nutrition?'ATTEINT':'— en attente'}</div>
-      <div class="metric-hint">${getProfile().id==='gain'?'2800+ kcal · 110g+ protéines':'Déficit léger · protéines · peu de sucres'}</div>
     </div>
   `;
 }
@@ -1765,13 +1805,13 @@ function renderGuide() {
     </div>
     <div class="guide-block">
       <h3>// SYSTÈME XP</h3>
-      <p>Chaque série cochée rapporte de l'XP. Terminer toutes les séries valide l'exo ; valider la séance complète donne un gros bonus. Sommeil, nutrition et mobilité rapportent aussi. L'hydratation est un simple suivi sans XP. Monte les niveaux, débloque les badges.</p>
+      <p>Chaque série cochée rapporte de l'XP. Terminer toutes les séries valide l'exo ; valider la séance complète donne un gros bonus. Le sommeil et la mobilité (étirements, yoga) rapportent aussi. Monte les niveaux, débloque les badges.</p>
     </div>
     <div class="guide-block">
       <h3>// PHASES</h3>
       ${p.phases.map(ph=>`<div class="phase-block"><div class="phase-block-label">${ph.label}</div><div class="phase-block-text">${ph.tip}</div></div>`).join('')}
     </div>
-    <button class="test-launch" data-action="test-mode">🔬 Tester un autre jour</button>
+    <button class="test-launch" data-action="test-mode">🔬 Voir tous les exercices</button>
     <p style="text-align:center;font-size:10px;color:var(--ink-faint);letter-spacing:0.15em;margin-top:8px;">ASCEND · VERSION ${APP_VERSION}</p>
   `;
 }
@@ -1933,11 +1973,13 @@ function markRoutineDone(kind, idx, i){
   const map = kind==='stretch' ? d.stretches : d.yoga;
   if(!map[i]){
     map[i]=true;
-    const list = kind==='stretch'?STRETCHES:YOGA;
-    const allDone=Object.values(map).filter(Boolean).length===list.length;
-    const flag = kind==='stretch'?'stretchAwarded':'yogaAwarded';
-    const xp = kind==='stretch'?15:20;
-    if(allDone && !d[flag]){ d[flag]=true; awardXP(xp, kind==='stretch'?'Étirements':'Yoga'); }
+    if(idx<900){
+      const list = kind==='stretch'?STRETCHES:YOGA;
+      const allDone=Object.values(map).filter(Boolean).length===list.length;
+      const flag = kind==='stretch'?'stretchAwarded':'yogaAwarded';
+      const xp = kind==='stretch'?15:20;
+      if(allDone && !d[flag]){ d[flag]=true; awardXP(xp, kind==='stretch'?'Étirements':'Yoga'); }
+    }
     saveProfile(); render();
   }
 }
@@ -1954,27 +1996,24 @@ function attachListeners() {
     if(currentView!=='today') previewDay=null; // quitter l'aperçu en changeant d'onglet
     render();
   }));
-  // Mode test : lancer l'aperçu d'un autre jour
+  // Mode test : afficher le catalogue de tous les exercices
   const tm=document.querySelector('[data-action="test-mode"]');
   if(tm) tm.addEventListener('click',()=>{
-    const real=getDayIndex();
-    previewDay = (real>=0 && real<TOTAL_DAYS) ? real : 0;
+    previewDay = 1; // sentinelle : active le mode test
     currentView='today'; render();
     window.scrollTo({top:0,behavior:'smooth'});
   });
-  const pPrev=document.querySelector('[data-action="preview-prev"]');
-  if(pPrev) pPrev.addEventListener('click',()=>{ if(previewDay>0){previewDay--; render();} });
-  const pNext=document.querySelector('[data-action="preview-next"]');
-  if(pNext) pNext.addEventListener('click',()=>{ if(previewDay<TOTAL_DAYS-1){previewDay++; render();} });
   const pExit=document.querySelector('[data-action="preview-exit"]');
   if(pExit) pExit.addEventListener('click',()=>{ previewDay=null; render(); });
   // Cocher une série : XP symétrique. Le bonus de séance se déclenche à la validation.
   document.querySelectorAll('[data-action="set-toggle"]').forEach(el=>el.addEventListener('click',()=>{
     const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
-    const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[exi];
+    const sandbox = idx>=900;
+    const d=getDay(idx); const sess=sessionForCard(idx); const ex=sess.exercises[exi];
     const arr=getSets(d, exi, ex.sets);
     const was=arr[si].done;
     arr[si].done=!was;
+    if(sandbox){ saveProfile(); render(); return; } // test : pas d'XP, pas de chrono
     const perSet=Math.max(1, Math.round(ex.xp/ex.sets));
     awardXP(was ? -perSet : perSet);
     if(was && d.validated){ d.validated=false; awardXP(-sess.xp,'Séance annulée'); }
@@ -1983,7 +2022,6 @@ function attachListeners() {
     let autoStart=0;
     if(!was){
       const restSec = ex.rest || 90;
-      // dernière série de cet exo ?
       const lastSetOfEx = (si === ex.sets-1);
       const lastEx = (exi === sess.exercises.length-1);
       if(!(lastSetOfEx && lastEx)) autoStart=restSec;
@@ -1991,7 +2029,6 @@ function attachListeners() {
     saveProfile(); render();
     if(autoStart>0){
       startTimer(autoStart);
-      // petit scroll fluide vers le chrono pour le voir tout de suite
       requestAnimationFrame(()=>{
         const t=document.getElementById('rest-timer');
         if(t) t.scrollIntoView({ behavior:'smooth', block:'center' });
@@ -2003,7 +2040,7 @@ function attachListeners() {
     el.addEventListener('click',(e)=>e.stopPropagation());
     el.addEventListener('change',(e)=>{
       const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
-      const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[exi];
+      const d=getDay(idx); const sess=sessionForCard(idx); const ex=sess.exercises[exi];
       const arr=getSets(d, exi, ex.sets);
       arr[si].reps=e.target.value; saveProfile();
     });
@@ -2013,7 +2050,7 @@ function attachListeners() {
     el.addEventListener('click',(e)=>e.stopPropagation());
     el.addEventListener('change',(e)=>{
       const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
-      const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[exi];
+      const d=getDay(idx); const sess=sessionForCard(idx); const ex=sess.exercises[exi];
       const arr=getSets(d, exi, ex.sets);
       arr[si].weight=e.target.value; saveProfile(); render(); // render pour MAJ le rappel de charge
     });
@@ -2026,12 +2063,14 @@ function attachListeners() {
 
   // Étape cardio (cochage simple, XP symétrique)
   document.querySelectorAll('[data-action="cardiostep"]').forEach(el=>el.addEventListener('click',(e)=>{
-    if(e.target.closest('[data-stop]')) return; // clic sur le lien démo : ne pas cocher
+    if(e.target.closest('[data-stop]')) return;
     const idx=parseInt(el.dataset.day), i=parseInt(el.dataset.idx);
-    const d=getDay(idx); const sess=sessionForDay(idx); const ex=sess.exercises[i];
+    const d=getDay(idx); const sess=sessionForCard(idx); const ex=sess.exercises[i];
     const was=d.cardioSteps[i]||false; d.cardioSteps[i]=!was;
-    awardXP(was ? -ex.xp : ex.xp, 'Cardio');
-    if(was && d.validated){ d.validated=false; awardXP(-sess.xp,'Séance annulée'); }
+    if(idx<900){
+      awardXP(was ? -ex.xp : ex.xp, 'Cardio');
+      if(was && d.validated){ d.validated=false; awardXP(-sess.xp,'Séance annulée'); }
+    }
     saveProfile(); render();
   }));
   // Liens démo : empêcher la propagation (ouvrent juste le lien)
@@ -2042,23 +2081,27 @@ function attachListeners() {
     const kind=el.dataset.kind, i=parseInt(el.dataset.idx);
     const list = kind==='stretch'?STRETCHES:YOGA;
     const item=list[i];
-    holdTimer.kind=kind; holdTimer.dayIdx=(previewDay!==null?previewDay:getDayIndex()); holdTimer.itemIdx=i;
+    holdTimer.kind=kind; holdTimer.dayIdx=(previewDay!==null?(kind==='stretch'?950:951):getDayIndex()); holdTimer.itemIdx=i;
     openHoldTimer(item);
   }));
   document.querySelectorAll('[data-action="stretch"]').forEach(el=>el.addEventListener('click',()=>{
     const idx=parseInt(el.dataset.day), i=el.dataset.idx; const d=getDay(idx);
     const was=d.stretches[i]||false; d.stretches[i]=!was;
-    const allDone=Object.values(d.stretches).filter(Boolean).length===STRETCHES.length;
-    if(allDone && !d.stretchAwarded){ d.stretchAwarded=true; awardXP(15,'Étirements'); }
-    else if(!allDone && d.stretchAwarded){ d.stretchAwarded=false; awardXP(-15,'Étirements'); }
+    if(idx<900){
+      const allDone=Object.values(d.stretches).filter(Boolean).length===STRETCHES.length;
+      if(allDone && !d.stretchAwarded){ d.stretchAwarded=true; awardXP(15,'Étirements'); }
+      else if(!allDone && d.stretchAwarded){ d.stretchAwarded=false; awardXP(-15,'Étirements'); }
+    }
     saveProfile(); render();
   }));
   document.querySelectorAll('[data-action="yoga"]').forEach(el=>el.addEventListener('click',()=>{
     const idx=parseInt(el.dataset.day), i=el.dataset.idx; const d=getDay(idx);
     const was=d.yoga[i]||false; d.yoga[i]=!was;
-    const allDone=Object.values(d.yoga).filter(Boolean).length===YOGA.length;
-    if(allDone && !d.yogaAwarded){ d.yogaAwarded=true; awardXP(20,'Yoga'); }
-    else if(!allDone && d.yogaAwarded){ d.yogaAwarded=false; awardXP(-20,'Yoga'); }
+    if(idx<900){
+      const allDone=Object.values(d.yoga).filter(Boolean).length===YOGA.length;
+      if(allDone && !d.yogaAwarded){ d.yogaAwarded=true; awardXP(20,'Yoga'); }
+      else if(!allDone && d.yogaAwarded){ d.yogaAwarded=false; awardXP(-20,'Yoga'); }
+    }
     saveProfile(); render();
   }));
   document.querySelectorAll('[data-action="sleep"]').forEach(el=>{
@@ -2072,11 +2115,6 @@ function attachListeners() {
       saveProfile();
     });
   });
-  document.querySelectorAll('[data-action="nutrition"]').forEach(el=>el.addEventListener('click',()=>{
-    const idx=parseInt(el.dataset.day); const d=getDay(idx); const was=d.nutrition; d.nutrition=!was;
-    awardXP(was ? -15 : 15,'Nutrition');
-    saveProfile(); render();
-  }));
   document.querySelectorAll('[data-toggle]').forEach(el=>el.addEventListener('click',()=>{ openSections[el.dataset.toggle]=!openSections[el.dataset.toggle]; render(); }));
   document.querySelectorAll('[data-timer]').forEach(el=>el.addEventListener('click',()=>{
     const v=el.dataset.timer;
