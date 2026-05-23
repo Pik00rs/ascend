@@ -176,19 +176,56 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .exo-prev { font-size:10px; padding:0 12px 10px 54px; letter-spacing:0.03em; color:var(--ink-faint); }
 .exo-prev .up { color:var(--ok); } .exo-prev .down { color:var(--amber); } .exo-prev .same { color:var(--ink-dim); }
 
-/* EXERCISE VISUAL (schema + demo button) */
-.exo-viz { padding:0 12px 12px 54px; display:flex; gap:10px; align-items:center; }
-.exo-viz-svg { width:72px; height:56px; flex-shrink:0; background:var(--bg-3); border:1px solid var(--border); }
-.exo-demo-btn { flex:1; display:flex; align-items:center; gap:8px; padding:9px 12px; background:var(--bg-3); border:1px solid var(--border-bright); color:var(--ink); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all 0.15s; }
-.exo-demo-btn:hover { border-color:var(--accent-dim); color:var(--accent); }
-.exo-demo-btn .play { font-size:13px; color:var(--accent); }
-.viz-stroke { stroke:var(--accent); fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
-.viz-body { stroke:var(--ink-dim); fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
-.viz-weight { fill:var(--magenta); }
-.viz-anim { animation: vizmove 2.2s ease-in-out infinite; }
-@keyframes vizmove { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
-.viz-anim-down { animation: vizmovedown 2.2s ease-in-out infinite; }
-@keyframes vizmovedown { 0%,100%{transform:translateY(0);} 50%{transform:translateY(7px);} }
+/* EXERCISE VISUAL (illustration + boutons démo) */
+.exo-viz { padding:4px 12px 14px 12px; display:flex; gap:12px; align-items:stretch; }
+.exo-viz-svg { width:96px; height:96px; flex-shrink:0; background:radial-gradient(circle at 50% 40%, var(--bg-3), var(--bg-2)); border:1px solid var(--border-bright); border-radius:6px; display:flex; align-items:center; justify-content:center; }
+.exo-viz-svg svg { width:100%; height:100%; display:block; }
+.exo-viz-actions { flex:1; display:flex; flex-direction:column; gap:6px; justify-content:center; }
+.exo-act-btn { display:flex; align-items:center; gap:9px; padding:11px 12px; background:var(--bg-3); border:1px solid var(--border-bright); color:var(--ink); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; font-weight:500; cursor:pointer; text-decoration:none; transition:all 0.15s; border-radius:4px; }
+.exo-act-btn:hover { border-color:var(--accent-dim); color:var(--accent); background:var(--bg); }
+.exo-act-btn:active { transform:scale(0.98); }
+.exo-act-btn .ic { width:18px; height:18px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.exo-act-btn.video .ic { color:var(--orange); }
+.exo-act-btn.machine .ic { color:var(--cyan); }
+.exo-act-btn .lbl { flex:1; }
+.exo-act-btn .arr { color:var(--ink-faint); font-size:11px; }
+
+/* Animations d'illustration : mouvement aller-retour fluide (2.4s) */
+.viz-press-arm { animation: vpress 2.4s ease-in-out infinite; transform-origin:62px 60px; }
+@keyframes vpress { 0%,100%{transform:translateY(8px);} 50%{transform:translateY(-4px);} }
+.viz-pull-arm { animation: vpull 2.4s ease-in-out infinite; transform-origin:60px 52px; }
+@keyframes vpull { 0%,100%{transform:translateY(-6px);} 50%{transform:translateY(8px);} }
+.viz-row-arm { animation: vrow 2.2s ease-in-out infinite; }
+@keyframes vrow { 0%,100%{transform:translateX(6px);} 50%{transform:translateX(-8px);} }
+.viz-squat { animation: vsquat 2.6s ease-in-out infinite; transform-origin:60px 60px; }
+@keyframes vsquat { 0%,100%{transform:translateY(0) scaleY(1);} 50%{transform:translateY(8px) scaleY(0.86);} }
+.viz-legpress { animation: vleg 2.4s ease-in-out infinite; transform-origin:50px 72px; }
+@keyframes vleg { 0%,100%{transform:translate(8px,-6px);} 50%{transform:translate(0,0);} }
+.viz-lunge { animation: vlunge 2.6s ease-in-out infinite; transform-origin:56px 68px; }
+@keyframes vlunge { 0%,100%{transform:translateY(0);} 50%{transform:translateY(7px);} }
+.viz-curl { animation: vcurl 2.2s ease-in-out infinite; transform-origin:50px 72px; }
+@keyframes vcurl { 0%,100%{transform:rotate(0deg);} 50%{transform:rotate(-42deg);} }
+.viz-lateral { animation: vlat 2.6s ease-in-out infinite; transform-origin:60px 52px; }
+@keyframes vlat { 0%,100%{transform:rotate(28deg) scale(0.9);} 50%{transform:rotate(0deg) scale(1);} }
+.viz-triceps { animation: vtri 2.2s ease-in-out infinite; transform-origin:64px 64px; }
+@keyframes vtri { 0%,100%{transform:scaleY(0.7);} 50%{transform:scaleY(1);} }
+.viz-fly { animation: vfly 2.6s ease-in-out infinite; transform-origin:60px 56px; }
+@keyframes vfly { 0%,100%{transform:scaleX(1);} 50%{transform:scaleX(0.55);} }
+.viz-calf { animation: vcalf 1.8s ease-in-out infinite; transform-origin:60px 100px; }
+@keyframes vcalf { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
+.viz-plank { animation: vbreathe 3.2s ease-in-out infinite; }
+.viz-pushup { animation: vpushup 2.4s ease-in-out infinite; transform-origin:60px 80px; }
+@keyframes vpushup { 0%,100%{transform:translateY(0);} 50%{transform:translateY(10px);} }
+.viz-pedal { animation: vpedal 1.2s linear infinite; }
+@keyframes vpedal { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+.viz-walk-leg { animation: vwalkleg 1s ease-in-out infinite; transform-origin:60px 76px; }
+@keyframes vwalkleg { 0%,100%{transform:rotate(-16deg);} 50%{transform:rotate(16deg);} }
+.viz-walk-arm { animation: vwalkarm 1s ease-in-out infinite; transform-origin:60px 52px; }
+@keyframes vwalkarm { 0%,100%{transform:rotate(16deg);} 50%{transform:rotate(-16deg);} }
+.viz-catcow { animation: vcatcow 3s ease-in-out infinite; transform-origin:60px 80px; }
+@keyframes vcatcow { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px) scaleY(0.95);} }
+.viz-breathe { animation: vbreathe 3.4s ease-in-out infinite; transform-origin:center; }
+@keyframes vbreathe { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.04);opacity:0.82;} }
 
 /* SET ROWS */
 .sets { padding:0 12px 12px 12px; }
@@ -242,6 +279,44 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .routine-item-name { font-size:12px; color:var(--ink); }
 .routine-item.done .routine-item-name { color:var(--ink-dim); text-decoration:line-through; }
 .routine-item-target { font-size:10px; color:var(--ink-dim); }
+
+/* Cartes étirement/yoga riches */
+.stretch-card { background:var(--bg-2); border:1px solid var(--border); border-radius:6px; margin-bottom:8px; overflow:hidden; transition:border-color 0.15s; }
+.stretch-card.done { border-color:rgba(240,65,255,0.3); background:rgba(240,65,255,0.03); }
+.stretch-head { display:grid; grid-template-columns:84px 1fr 26px; gap:12px; align-items:center; padding:12px; }
+.stretch-svg { width:84px; height:84px; background:radial-gradient(circle at 50% 40%, var(--bg-3), var(--bg-2)); border:1px solid var(--border-bright); border-radius:6px; }
+.stretch-svg svg { width:100%; height:100%; }
+.stretch-info { min-width:0; }
+.stretch-name { font-size:13px; font-weight:700; color:var(--ink); margin-bottom:3px; line-height:1.25; }
+.stretch-card.done .stretch-name { color:var(--ink-dim); text-decoration:line-through; }
+.stretch-target { font-family:'Orbitron',monospace; font-size:13px; font-weight:700; color:var(--magenta); margin-bottom:8px; }
+.stretch-card.done .stretch-target { color:var(--ink-dim); }
+.stretch-btns { display:flex; gap:6px; }
+.stretch-btn { display:flex; align-items:center; gap:6px; padding:7px 10px; background:var(--bg-3); border:1px solid var(--border-bright); color:var(--ink); font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; font-weight:500; cursor:pointer; text-decoration:none; border-radius:4px; transition:all 0.15s; }
+.stretch-btn:active { transform:scale(0.97); }
+.stretch-btn.timer { border-color:var(--magenta-dim); color:var(--magenta); }
+.stretch-btn.timer:hover { background:rgba(240,65,255,0.08); }
+.stretch-btn.video { color:var(--orange); border-color:#b34721; }
+.stretch-btn .ic { width:13px; height:13px; display:flex; }
+.stretch-checkbox { width:26px; height:26px; border:1.5px solid var(--ink-faint); position:relative; cursor:pointer; align-self:flex-start; transition:all 0.12s; }
+.stretch-card.done .stretch-checkbox { background:var(--magenta); border-color:var(--magenta); box-shadow:0 0 8px rgba(240,65,255,0.4); }
+.stretch-card.done .stretch-checkbox::after { content:''; position:absolute; top:5px; left:9px; width:5px; height:11px; border-right:2px solid var(--bg); border-bottom:2px solid var(--bg); transform:rotate(45deg); }
+
+/* Timer plein écran pour étirement/yoga */
+.hold-timer-overlay { position:fixed; inset:0; z-index:500; background:rgba(5,6,12,0.96); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; animation:fade-in 0.2s; }
+.hold-timer-svg { width:140px; height:140px; margin-bottom:20px; }
+.hold-timer-svg svg { width:100%; height:100%; }
+.hold-timer-name { font-family:'Orbitron',monospace; font-weight:700; font-size:18px; color:var(--ink); text-align:center; margin-bottom:6px; letter-spacing:0.05em; }
+.hold-timer-side { font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--magenta); margin-bottom:24px; }
+.hold-ring-wrap { position:relative; width:200px; height:200px; margin-bottom:28px; }
+.hold-ring-wrap svg { width:100%; height:100%; transform:rotate(-90deg); }
+.hold-ring-bg { fill:none; stroke:var(--bg-3); stroke-width:8; }
+.hold-ring-fg { fill:none; stroke:var(--magenta); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1s linear; filter:drop-shadow(0 0 6px var(--magenta)); }
+.hold-ring-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-weight:900; font-size:54px; color:var(--ink); }
+.hold-timer-btns { display:flex; gap:10px; }
+.hold-timer-btn { padding:13px 24px; background:var(--bg-2); border:1px solid var(--border-bright); color:var(--ink); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; cursor:pointer; border-radius:4px; }
+.hold-timer-btn.primary { border-color:var(--magenta); color:var(--magenta); }
+.hold-timer-btn.done-btn { border-color:var(--ok); color:var(--ok); }
 
 /* REST TIMER */
 .rest-timer { padding:16px; background:var(--bg-2); border:1px solid var(--orange); margin-bottom:10px; box-shadow:0 0 12px rgba(255,107,53,0.08); transition:border-color 0.3s, box-shadow 0.3s; }
@@ -408,7 +483,7 @@ input:focus { outline:none; }
 // >>> NUMÉRO DE VERSION <<<
 // À INCRÉMENTER À CHAQUE FOIS QUE TU DÉPLOIES UNE NOUVELLE VERSION SUR GITHUB.
 // L'app compare ce numéro à celui de version.json et propose la mise à jour.
-const APP_VERSION = 9;
+const APP_VERSION = 11;
 
 const TOTAL_DAYS = 42;
 const STORE_PREFIX = 'ascend_v1_';
@@ -518,20 +593,20 @@ const PHASES_LOSS = [
 ];
 
 const STRETCHES = [
-  { name:'Étirement pecs', target:'45 sec' },
-  { name:'Étirement dos / dorsaux', target:'30 sec' },
-  { name:'Étirement quadriceps', target:'30s/jambe' },
-  { name:'Étirement ischios', target:'45 sec' },
-  { name:'Étirement épaules', target:'30s/côté' },
-  { name:'Mobilité dos (cat-cow)', target:'60 sec' }
+  { name:'Étirement pecs', target:'45 sec', viz:'stretch_chest', secs:45 },
+  { name:'Étirement dos / dorsaux', target:'30 sec', viz:'stretch_back', secs:30 },
+  { name:'Étirement quadriceps', target:'30s / jambe', viz:'stretch_quad', secs:30, perSide:true },
+  { name:'Étirement ischios', target:'45 sec', viz:'stretch_ham', secs:45 },
+  { name:'Étirement épaules', target:'30s / côté', viz:'stretch_shoulder', secs:30, perSide:true },
+  { name:'Mobilité dos (cat-cow)', target:'60 sec', viz:'stretch_catcow', secs:60 }
 ];
 const YOGA = [
-  { name:'Salutation au soleil', target:'5 cycles' },
-  { name:'Guerrier I & II', target:'45s/côté' },
-  { name:'Chien tête en bas', target:'60 sec' },
-  { name:'Posture de l\'enfant', target:'60 sec' },
-  { name:'Torsion couchée', target:'60s/côté' },
-  { name:'Savasana', target:'3 min' }
+  { name:'Salutation au soleil', target:'5 cycles', viz:'yoga_sun', secs:60 },
+  { name:'Guerrier I & II', target:'45s / côté', viz:'yoga_warrior', secs:45, perSide:true },
+  { name:'Chien tête en bas', target:'60 sec', viz:'yoga_dog', secs:60 },
+  { name:'Posture de l\'enfant', target:'60 sec', viz:'yoga_child', secs:60 },
+  { name:'Torsion couchée', target:'60s / côté', viz:'yoga_twist', secs:60, perSide:true },
+  { name:'Savasana', target:'3 min', viz:'yoga_savasana', secs:180 }
 ];
 
 // Définition des profils
@@ -649,48 +724,423 @@ function getProfile() { return PROFILES[activeProfile]; }
 
 // === VISUELS D'EXERCICE ===
 // Schéma SVG simple selon la catégorie de mouvement (hors-ligne, toujours dispo).
+// === ILLUSTRATIONS D'EXERCICE ===
+// Schémas SVG clairs, proportionnés, animés (2 phases du mouvement).
+// viewBox 120x120, personnage stylisé reconnaissable + matériel.
 function vizSVG(viz) {
-  const W='class="viz-body"', S='class="viz-stroke"';
-  const head=(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="5" ${W}/>`;
+  // Helpers de dessin
+  const B='stroke="var(--ink-dim)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+  const A='stroke="var(--accent)" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+  const head=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r||7}" fill="var(--ink-dim)"/>`;
+  const wPlate=(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="6.5" fill="var(--magenta)"/>`;
+  const bar=(x1,y,x2)=>`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="var(--magenta)" stroke-width="3.5" stroke-linecap="round"/>`;
+  const floor=(y)=>`<line x1="14" y1="${y}" x2="106" y2="${y}" stroke="var(--border-bright)" stroke-width="2.5"/>`;
+  const wrap=(inner,anim)=>`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><g class="${anim||''}">${inner}</g></svg>`;
+
   switch(viz){
-    case 'bench': // développé couché
-      return `<svg viewBox="0 0 72 56"><rect x="10" y="34" width="52" height="4" ${W}/><line x1="36" y1="34" x2="36" y2="22" ${W}/>${head(36,16)}<g class="viz-anim"><line x1="20" y1="14" x2="52" y2="14" ${S}/><circle cx="20" cy="14" r="4" class="viz-weight"/><circle cx="52" cy="14" r="4" class="viz-weight"/></g></svg>`;
-    case 'press': // développé vertical / militaire
-      return `<svg viewBox="0 0 72 56">${head(36,40)}<line x1="36" y1="45" x2="36" y2="34" ${W}/><g class="viz-anim"><line x1="22" y1="20" x2="50" y2="20" ${S}/><circle cx="22" cy="20" r="4" class="viz-weight"/><circle cx="50" cy="20" r="4" class="viz-weight"/></g><line x1="36" y1="34" x2="28" y2="22" ${W}/><line x1="36" y1="34" x2="44" y2="22" ${W}/></svg>`;
-    case 'pull': // tirage vertical
-      return `<svg viewBox="0 0 72 56"><g class="viz-anim-down"><line x1="20" y1="12" x2="52" y2="12" ${S}/></g>${head(36,30)}<line x1="36" y1="35" x2="36" y2="46" ${W}/><line x1="36" y1="35" x2="26" y2="18" ${W}/><line x1="36" y1="35" x2="46" y2="18" ${W}/></svg>`;
-    case 'row': // rowing
-      return `<svg viewBox="0 0 72 56">${head(22,22)}<line x1="22" y1="27" x2="22" y2="42" ${W}/><g class="viz-anim"><line x1="22" y1="32" x2="50" y2="32" ${S}/><rect x="48" y="28" width="8" height="8" class="viz-weight"/></g></svg>`;
-    case 'squat': case 'press_legs': // squat / presse jambes
-      return `<svg viewBox="0 0 72 56">${head(36,16)}<g class="viz-anim-down"><line x1="36" y1="21" x2="36" y2="32" ${W}/><line x1="36" y1="32" x2="28" y2="44" ${W}/><line x1="36" y1="32" x2="44" y2="44" ${W}/></g><line x1="24" y1="14" x2="48" y2="14" ${S}/></svg>`;
-    case 'lunge': // fentes
-      return `<svg viewBox="0 0 72 56">${head(34,16)}<line x1="34" y1="21" x2="34" y2="32" ${W}/><g class="viz-anim-down"><line x1="34" y1="32" x2="22" y2="44" ${W}/><line x1="34" y1="32" x2="48" y2="40" ${W}/><line x1="48" y1="40" x2="48" y2="48" ${W}/></g></svg>`;
-    case 'curl': // curl biceps
-      return `<svg viewBox="0 0 72 56">${head(36,16)}<line x1="36" y1="21" x2="36" y2="40" ${W}/><line x1="36" y1="26" x2="26" y2="34" ${W}/><g class="viz-anim"><line x1="26" y1="34" x2="24" y2="24" ${W}/><circle cx="24" cy="22" r="4" class="viz-weight"/></g></svg>`;
-    case 'lateral': // élévations latérales
-      return `<svg viewBox="0 0 72 56">${head(36,18)}<line x1="36" y1="23" x2="36" y2="44" ${W}/><g class="viz-anim"><line x1="36" y1="28" x2="20" y2="26" ${S}/><line x1="36" y1="28" x2="52" y2="26" ${S}/><circle cx="18" cy="26" r="4" class="viz-weight"/><circle cx="54" cy="26" r="4" class="viz-weight"/></g></svg>`;
-    case 'triceps': // extension triceps
-      return `<svg viewBox="0 0 72 56">${head(36,16)}<line x1="36" y1="21" x2="36" y2="42" ${W}/><line x1="36" y1="26" x2="44" y2="20" ${W}/><g class="viz-anim-down"><line x1="44" y1="20" x2="44" y2="34" ${S}/><rect x="40" y="34" width="8" height="6" class="viz-weight"/></g></svg>`;
-    case 'fly': // écarté / pec deck
-      return `<svg viewBox="0 0 72 56">${head(36,18)}<line x1="36" y1="23" x2="36" y2="44" ${W}/><g class="viz-anim"><path d="M36 28 L20 22" ${S}/><path d="M36 28 L52 22" ${S}/></g></svg>`;
-    case 'calf': // mollets
-      return `<svg viewBox="0 0 72 56">${head(36,14)}<line x1="36" y1="19" x2="36" y2="36" ${W}/><g class="viz-anim"><line x1="36" y1="36" x2="36" y2="46" ${W}/><line x1="30" y1="48" x2="42" y2="48" ${S}/></g></svg>`;
-    case 'plank': // gainage
-      return `<svg viewBox="0 0 72 56"><line x1="14" y1="40" x2="58" y2="30" class="viz-stroke"/>${head(58,26)}<line x1="20" y1="40" x2="20" y2="48" ${W}/></svg>`;
-    case 'pushup': // pompes
-      return `<svg viewBox="0 0 72 56"><g class="viz-anim-down"><line x1="14" y1="36" x2="56" y2="28" class="viz-stroke"/>${head(56,24)}</g><line x1="20" y1="36" x2="20" y2="46" ${W}/><line x1="44" y1="34" x2="44" y2="46" ${W}/></svg>`;
-    case 'chair': // squat sur chaise
-      return `<svg viewBox="0 0 72 56"><rect x="40" y="34" width="16" height="14" ${W}/>${head(30,16)}<g class="viz-anim-down"><line x1="30" y1="21" x2="30" y2="34" ${W}/><line x1="30" y1="34" x2="24" y2="46" ${W}/></g></svg>`;
-    case 'bike': // vélo
-      return `<svg viewBox="0 0 72 56"><circle cx="22" cy="40" r="10" ${W}/><circle cx="52" cy="40" r="10" ${W}/><g class="viz-anim"><circle cx="37" cy="40" r="3" class="viz-weight"/></g><line x1="37" y1="40" x2="44" y2="22" ${W}/>${head(46,18)}</svg>`;
-    case 'walk': // marche tapis
-      return `<svg viewBox="0 0 72 56"><line x1="10" y1="46" x2="62" y2="46" class="viz-stroke"/>${head(36,16)}<line x1="36" y1="21" x2="36" y2="32" ${W}/><g class="viz-anim"><line x1="36" y1="32" x2="28" y2="44" ${W}/><line x1="36" y1="32" x2="44" y2="42" ${W}/></g></svg>`;
+    case 'bench': // développé couché — vue de côté, allongé sur banc, pousse la barre
+      return `<svg viewBox="0 0 120 120">
+        ${floor(104)}
+        <rect x="28" y="78" width="64" height="7" rx="3" fill="var(--bg-3)" stroke="var(--border-bright)" stroke-width="2"/>
+        <line x1="36" y1="85" x2="32" y2="104" ${B}/><line x1="84" y1="85" x2="88" y2="104" ${B}/>
+        ${head(30,72)}
+        <line x1="38" y1="74" x2="74" y2="74" ${B}/>
+        <g class="viz-press-arm">
+          <line x1="62" y1="74" x2="62" y2="44" ${A}/>
+          ${bar(46,40,78)}${wPlate(46,40)}${wPlate(78,40)}
+        </g>
+      </svg>`;
+
+    case 'press': // développé militaire — assis/debout, pousse au-dessus de la tête
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,40)}
+        <line x1="60" y1="47" x2="60" y2="82" ${B}/>
+        <line x1="60" y1="82" x2="50" y2="104" ${B}/><line x1="60" y1="82" x2="70" y2="104" ${B}/>
+        <g class="viz-press-arm">
+          <line x1="60" y1="54" x2="44" y2="34" ${A}/><line x1="60" y1="54" x2="76" y2="34" ${A}/>
+          ${bar(38,30,82)}${wPlate(38,30)}${wPlate(82,30)}
+        </g>
+      </svg>`;
+
+    case 'pull': // tirage vertical — assis, tire la barre vers le bas
+      return `<svg viewBox="0 0 120 120">
+        ${head(60,54)}
+        <line x1="60" y1="61" x2="60" y2="92" ${B}/>
+        <line x1="60" y1="92" x2="48" y2="104" ${B}/><line x1="60" y1="92" x2="72" y2="104" ${B}/>
+        <g class="viz-pull-arm">
+          <line x1="60" y1="66" x2="44" y2="40" ${A}/><line x1="60" y1="66" x2="76" y2="40" ${A}/>
+          ${bar(36,36,84)}${wPlate(36,36)}${wPlate(84,36)}
+        </g>
+      </svg>`;
+
+    case 'row': // rowing assis — tire la poignée vers le ventre
+      return `<svg viewBox="0 0 120 120">
+        ${floor(104)}
+        ${head(38,52)}
+        <line x1="38" y1="59" x2="38" y2="86" ${B}/>
+        <line x1="38" y1="86" x2="62" y2="92" ${B}/><line x1="62" y1="92" x2="84" y2="92" ${B}/>
+        <g class="viz-row-arm">
+          <line x1="38" y1="64" x2="68" y2="66" ${A}/>
+          <rect x="68" y="60" width="9" height="12" rx="2" fill="var(--magenta)"/>
+        </g>
+        <line x1="88" y1="50" x2="88" y2="92" stroke="var(--border-bright)" stroke-width="3"/>
+      </svg>`;
+
+    case 'squat': // squat — descend en pliant les genoux
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${bar(38,34,82)}${wPlate(38,34)}${wPlate(82,34)}
+        <line x1="42" y1="34" x2="78" y2="34" stroke="var(--magenta)" stroke-width="3.5"/>
+        <g class="viz-squat">
+          ${head(60,46)}
+          <line x1="60" y1="53" x2="60" y2="74" ${A}/>
+          <line x1="60" y1="74" x2="46" y2="84" ${A}/><line x1="46" y1="84" x2="48" y2="104" ${A}/>
+          <line x1="60" y1="74" x2="74" y2="84" ${A}/><line x1="74" y1="84" x2="72" y2="104" ${A}/>
+        </g>
+      </svg>`;
+
+    case 'press_legs': // presse à cuisses — incliné, pousse la plateforme avec les jambes
+      return `<svg viewBox="0 0 120 120">
+        <line x1="20" y1="100" x2="64" y2="60" stroke="var(--border-bright)" stroke-width="3"/>
+        ${head(30,82)}
+        <line x1="34" y1="80" x2="50" y2="72" ${B}/>
+        <g class="viz-legpress">
+          <line x1="50" y1="72" x2="68" y2="64" ${A}/><line x1="68" y1="64" x2="82" y2="50" ${A}/>
+          <rect x="78" y="38" width="22" height="10" rx="2" fill="var(--magenta)"/>
+        </g>
+      </svg>`;
+
+    case 'lunge': // fente — une jambe avant pliée
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(56,38)}
+        <line x1="56" y1="45" x2="56" y2="68" ${B}/>
+        <g class="viz-lunge">
+          <line x1="56" y1="68" x2="40" y2="82" ${A}/><line x1="40" y1="82" x2="40" y2="104" ${A}/>
+          <line x1="56" y1="68" x2="74" y2="86" ${A}/><line x1="74" y1="86" x2="86" y2="104" ${A}/>
+        </g>
+        <line x1="48" y1="50" x2="44" y2="70" ${B}/><line x1="64" y1="50" x2="68" y2="70" ${B}/>
+        ${wPlate(44,72)}${wPlate(68,72)}
+      </svg>`;
+
+    case 'curl': // curl biceps — replie l'avant-bras avec haltère
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,38)}
+        <line x1="60" y1="45" x2="60" y2="80" ${B}/>
+        <line x1="60" y1="80" x2="52" y2="104" ${B}/><line x1="60" y1="80" x2="68" y2="104" ${B}/>
+        <line x1="60" y1="52" x2="50" y2="72" ${B}/>
+        <g class="viz-curl">
+          <line x1="50" y1="72" x2="52" y2="52" ${A}/>
+          ${wPlate(53,48)}${wPlate(53,58)}
+        </g>
+      </svg>`;
+
+    case 'lateral': // élévations latérales — lève les bras sur les côtés
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,36)}
+        <line x1="60" y1="43" x2="60" y2="80" ${B}/>
+        <line x1="60" y1="80" x2="52" y2="104" ${B}/><line x1="60" y1="80" x2="68" y2="104" ${B}/>
+        <g class="viz-lateral">
+          <line x1="60" y1="52" x2="36" y2="50" ${A}/><line x1="60" y1="52" x2="84" y2="50" ${A}/>
+          ${wPlate(34,50)}${wPlate(86,50)}
+        </g>
+      </svg>`;
+
+    case 'triceps': // extension triceps — pousse vers le bas à la poulie
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,38)}
+        <line x1="60" y1="45" x2="60" y2="80" ${B}/>
+        <line x1="60" y1="80" x2="52" y2="104" ${B}/><line x1="60" y1="80" x2="68" y2="104" ${B}/>
+        <line x1="60" y1="52" x2="64" y2="64" ${B}/>
+        <g class="viz-triceps">
+          <line x1="64" y1="64" x2="64" y2="80" ${A}/>
+          <rect x="58" y="80" width="12" height="6" rx="2" fill="var(--magenta)"/>
+        </g>
+        <line x1="64" y1="20" x2="64" y2="52" stroke="var(--border-bright)" stroke-width="2.5"/>
+      </svg>`;
+
+    case 'fly': // écarté / pec deck — ouvre/ferme les bras devant
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,40)}
+        <line x1="60" y1="47" x2="60" y2="82" ${B}/>
+        <line x1="60" y1="82" x2="52" y2="104" ${B}/><line x1="60" y1="82" x2="68" y2="104" ${B}/>
+        <g class="viz-fly">
+          <line x1="60" y1="56" x2="38" y2="48" ${A}/><line x1="60" y1="56" x2="82" y2="48" ${A}/>
+          ${wPlate(36,47)}${wPlate(84,47)}
+        </g>
+      </svg>`;
+
+    case 'calf': // mollets — monte sur la pointe des pieds
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,40)}
+        <line x1="60" y1="47" x2="60" y2="82" ${B}/>
+        <g class="viz-calf">
+          <line x1="60" y1="82" x2="54" y2="100" ${A}/><line x1="60" y1="82" x2="66" y2="100" ${A}/>
+          <line x1="50" y1="100" x2="58" y2="100" ${A}/><line x1="62" y1="100" x2="70" y2="100" ${A}/>
+        </g>
+        ${bar(46,30,74)}${wPlate(46,30)}${wPlate(74,30)}
+        <line x1="60" y1="47" x2="48" y2="32" ${B}/><line x1="60" y1="47" x2="72" y2="32" ${B}/>
+      </svg>`;
+
+    case 'plank': // gainage — corps droit en appui sur les avant-bras
+      return `<svg viewBox="0 0 120 120">
+        ${floor(100)}
+        <g class="viz-plank">
+          <line x1="28" y1="86" x2="96" y2="62" ${A}/>
+          ${head(100,58)}
+          <line x1="32" y1="86" x2="30" y2="100" ${B}/>
+          <line x1="32" y1="86" x2="42" y2="100" ${B}/>
+          <line x1="88" y1="65" x2="88" y2="100" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'pushup': // pompes — monte et descend le corps
+      return `<svg viewBox="0 0 120 120">
+        ${floor(102)}
+        <g class="viz-pushup">
+          <line x1="26" y1="78" x2="94" y2="56" ${A}/>
+          ${head(98,52)}
+          <line x1="34" y1="76" x2="34" y2="100" ${B}/>
+          <line x1="84" y1="60" x2="84" y2="100" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'chair': // squat sur chaise — s'assoit et se relève
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        <rect x="62" y="74" width="26" height="30" fill="none" stroke="var(--border-bright)" stroke-width="3"/>
+        <line x1="62" y1="74" x2="62" y2="56" stroke="var(--border-bright)" stroke-width="3"/>
+        <g class="viz-squat">
+          ${head(46,42)}
+          <line x1="46" y1="49" x2="46" y2="72" ${A}/>
+          <line x1="46" y1="72" x2="40" y2="88" ${A}/><line x1="40" y1="88" x2="42" y2="104" ${A}/>
+          <line x1="46" y1="60" x2="58" y2="64" ${A}/>
+        </g>
+      </svg>`;
+
+    case 'bike': // vélo — pédale, jambes qui tournent
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        <circle cx="34" cy="84" r="16" ${B}/><circle cx="86" cy="84" r="16" ${B}/>
+        <line x1="34" y1="84" x2="60" y2="84" ${B}/><line x1="60" y1="84" x2="86" y2="84" ${B}/>
+        <line x1="60" y1="84" x2="58" y2="54" ${B}/>
+        <line x1="58" y1="54" x2="76" y2="50" ${B}/>
+        ${head(58,42)}
+        <line x1="58" y1="48" x2="58" y2="60" ${B}/>
+        <g class="viz-pedal" style="transform-origin:60px 84px;">
+          <line x1="60" y1="84" x2="60" y2="94" ${A}/>
+        </g>
+        <line x1="60" y1="62" x2="50" y2="84" ${A}/>
+      </svg>`;
+
+    case 'walk': // marche — jambes en mouvement de marche
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,38)}
+        <line x1="60" y1="45" x2="60" y2="76" ${B}/>
+        <g class="viz-walk-arm"><line x1="60" y1="52" x2="50" y2="68" ${A}/></g>
+        <line x1="60" y1="52" x2="70" y2="68" ${B}/>
+        <g class="viz-walk-leg">
+          <line x1="60" y1="76" x2="48" y2="92" ${A}/><line x1="48" y1="92" x2="46" y2="104" ${A}/>
+        </g>
+        <line x1="60" y1="76" x2="72" y2="92" ${B}/><line x1="72" y1="92" x2="74" y2="104" ${B}/>
+      </svg>`;
+
+    // === ÉTIREMENTS ===
+    case 'stretch_chest': // étirement pectoraux contre un mur
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        <line x1="86" y1="20" x2="86" y2="104" stroke="var(--border-bright)" stroke-width="3"/>
+        ${head(56,40)}
+        <line x1="56" y1="47" x2="56" y2="80" ${B}/>
+        <line x1="56" y1="80" x2="50" y2="104" ${B}/><line x1="56" y1="80" x2="62" y2="104" ${B}/>
+        <line x1="56" y1="54" x2="82" y2="50" ${A}/>
+        <g class="viz-breathe"><circle cx="56" cy="40" r="7" fill="none" ${A}/></g>
+      </svg>`;
+
+    case 'stretch_back': // étirement dos — penché en avant
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        <g class="viz-breathe">
+          ${head(40,44)}
+          <line x1="44" y1="48" x2="68" y2="62" ${A}/>
+          <line x1="68" y1="62" x2="68" y2="104" ${B}/>
+          <line x1="44" y1="48" x2="34" y2="64" ${A}/>
+        </g>
+      </svg>`;
+
+    case 'stretch_quad': // étirement quadriceps debout — talon vers la fesse
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,38)}
+        <line x1="60" y1="45" x2="60" y2="76" ${B}/>
+        <line x1="60" y1="76" x2="58" y2="104" ${B}/>
+        <g class="viz-breathe">
+          <line x1="60" y1="76" x2="72" y2="88" ${A}/><line x1="72" y1="88" x2="64" y2="74" ${A}/>
+          <line x1="60" y1="56" x2="66" y2="74" ${A}/>
+        </g>
+      </svg>`;
+
+    case 'stretch_ham': // étirement ischios — assis jambes tendues, mains vers pieds
+      return `<svg viewBox="0 0 120 120">
+        ${floor(100)}
+        <g class="viz-breathe">
+          ${head(40,52)}
+          <line x1="42" y1="58" x2="44" y2="80" ${B}/>
+          <line x1="44" y1="80" x2="92" y2="80" ${A}/>
+          <line x1="44" y1="62" x2="78" y2="76" ${A}/>
+        </g>
+      </svg>`;
+
+    case 'stretch_shoulder': // étirement épaules — bras croisé devant
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,40)}
+        <line x1="60" y1="47" x2="60" y2="80" ${B}/>
+        <line x1="60" y1="80" x2="52" y2="104" ${B}/><line x1="60" y1="80" x2="68" y2="104" ${B}/>
+        <g class="viz-breathe">
+          <line x1="60" y1="56" x2="84" y2="58" ${A}/>
+          <line x1="84" y1="58" x2="78" y2="50" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'stretch_catcow': // mobilité dos — à quatre pattes
+      return `<svg viewBox="0 0 120 120">
+        ${floor(104)}
+        <g class="viz-catcow">
+          ${head(34,56)}
+          <path d="M38 58 Q60 46 86 56" ${A}/>
+          <line x1="42" y1="62" x2="42" y2="100" ${B}/>
+          <line x1="82" y1="60" x2="82" y2="100" ${B}/>
+        </g>
+      </svg>`;
+
+    // === YOGA ===
+    case 'yoga_sun': // salutation au soleil — bras levés
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,40)}
+        <line x1="60" y1="47" x2="60" y2="82" ${B}/>
+        <line x1="60" y1="82" x2="52" y2="104" ${B}/><line x1="60" y1="82" x2="68" y2="104" ${B}/>
+        <g class="viz-breathe">
+          <line x1="60" y1="52" x2="50" y2="26" ${A}/><line x1="60" y1="52" x2="70" y2="26" ${A}/>
+        </g>
+      </svg>`;
+
+    case 'yoga_warrior': // guerrier — fente bras écartés
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,38)}
+        <line x1="60" y1="45" x2="60" y2="70" ${B}/>
+        <line x1="60" y1="56" x2="36" y2="54" ${A}/><line x1="60" y1="56" x2="84" y2="54" ${A}/>
+        <line x1="60" y1="70" x2="40" y2="84" ${A}/><line x1="40" y1="84" x2="40" y2="104" ${A}/>
+        <line x1="60" y1="70" x2="80" y2="88" ${A}/><line x1="80" y1="88" x2="92" y2="104" ${A}/>
+      </svg>`;
+
+    case 'yoga_dog': // chien tête en bas — V inversé
+      return `<svg viewBox="0 0 120 120">
+        ${floor(106)}
+        <g class="viz-breathe">
+          <line x1="28" y1="104" x2="60" y2="50" ${A}/>
+          <line x1="60" y1="50" x2="92" y2="104" ${A}/>
+          ${head(30,98,6)}
+        </g>
+      </svg>`;
+
+    case 'yoga_child': // posture de l'enfant — replié au sol
+      return `<svg viewBox="0 0 120 120">
+        ${floor(100)}
+        <g class="viz-breathe">
+          <path d="M30 96 Q44 70 68 78" ${A}/>
+          ${head(28,92,7)}
+          <line x1="30" y1="90" x2="86" y2="84" ${B}/>
+          <line x1="68" y1="78" x2="86" y2="84" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'yoga_twist': // torsion couchée
+      return `<svg viewBox="0 0 120 120">
+        ${floor(100)}
+        <g class="viz-breathe">
+          ${head(30,82)}
+          <line x1="34" y1="82" x2="78" y2="82" ${A}/>
+          <line x1="78" y1="82" x2="92" y2="64" ${A}/>
+          <line x1="50" y1="82" x2="44" y2="64" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'yoga_savasana': // savasana — allongé détente
+      return `<svg viewBox="0 0 120 120">
+        ${floor(86)}
+        <g class="viz-breathe">
+          ${head(28,76)}
+          <line x1="34" y1="78" x2="98" y2="78" ${A}/>
+        </g>
+        <text x="60" y="50" text-anchor="middle" fill="var(--ink-faint)" font-size="11" font-family="monospace">zZ</text>
+      </svg>`;
+
     default:
-      return `<svg viewBox="0 0 72 56">${head(36,18)}<line x1="36" y1="23" x2="36" y2="40" class="viz-body"/><line x1="36" y1="28" x2="26" y2="36" class="viz-body"/><line x1="36" y1="28" x2="46" y2="36" class="viz-body"/></svg>`;
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        ${head(60,40)}
+        <line x1="60" y1="47" x2="60" y2="80" ${B}/>
+        <line x1="60" y1="56" x2="44" y2="64" ${B}/><line x1="60" y1="56" x2="76" y2="64" ${B}/>
+        <line x1="60" y1="80" x2="50" y2="104" ${B}/><line x1="60" y1="80" x2="70" y2="104" ${B}/>
+      </svg>`;
   }
 }
 function videoURL(exName){
-  return 'https://www.youtube.com/results?search_query='+encodeURIComponent(exName+' exercice technique');
+  return 'https://www.youtube.com/results?search_query='+encodeURIComponent(exName+' technique exercice musculation');
+}
+function machineURL(exName){
+  return 'https://www.google.com/search?tbm=isch&q='+encodeURIComponent(exName+' machine salle de sport');
+}
+// Icônes SVG inline
+const IC_PLAY='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const IC_MACHINE='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="11" rx="1"/><path d="M7 8V5h10v3M9 19v2M15 19v2"/></svg>';
+const IC_TIMER='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 13V9M9 2h6"/></svg>';
+// Bloc visuel : illustration + boutons (vidéo démo + voir la machine).
+// stopAttr: à passer pour les éléments dans une zone cliquable (cardio/étirement) pour ne pas déclencher le toggle.
+function vizBlock(ex, opts){
+  opts=opts||{};
+  const stop = opts.stop ? 'data-stop="1"' : '';
+  const showMachine = (ex.machine || opts.forceMachine);
+  return `
+    <div class="exo-viz">
+      <div class="exo-viz-svg">${vizSVG(ex.viz)}</div>
+      <div class="exo-viz-actions">
+        <a class="exo-act-btn video" href="${videoURL(ex.name)}" target="_blank" rel="noopener" ${stop}><span class="ic">${IC_PLAY}</span><span class="lbl">Voir la démo vidéo</span><span class="arr">↗</span></a>
+        ${showMachine?`<a class="exo-act-btn machine" href="${machineURL(ex.name)}" target="_blank" rel="noopener" ${stop}><span class="ic">${IC_MACHINE}</span><span class="lbl">Voir la machine</span><span class="arr">↗</span></a>`:''}
+      </div>
+    </div>`;
+}
+
+// Liste d'étirements ou yoga en cartes riches (illustration + vidéo + timer)
+function renderRoutineList(items, kind, idx, doneMap){
+  return items.map((it,i)=>{
+    const ck=doneMap[i]||false;
+    return `
+      <div class="stretch-card ${ck?'done':''}">
+        <div class="stretch-head">
+          <div class="stretch-svg">${vizSVG(it.viz)}</div>
+          <div class="stretch-info">
+            <div class="stretch-name">${it.name}</div>
+            <div class="stretch-target">${it.target}</div>
+            <div class="stretch-btns">
+              <button class="stretch-btn timer" data-action="hold-timer" data-kind="${kind}" data-idx="${i}"><span class="ic">${IC_TIMER}</span>Lancer</button>
+              <a class="stretch-btn video" href="${videoURL(it.name+' étirement')}" target="_blank" rel="noopener"><span class="ic">${IC_PLAY}</span>Démo</a>
+            </div>
+          </div>
+          <div class="stretch-checkbox" data-action="${kind}" data-day="${idx}" data-idx="${i}"></div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 // Quelle session de sport pour un jour d'entraînement donné.
@@ -996,9 +1446,9 @@ function renderRestDay(idx, dayLabel, date, weekNum, phase, isOff) {
     </div>
     <div class="section-label">${isOff?'Mobilité (optionnel)':'Programme du jour'} <span class="count">+XP</span></div>
     <button class="collapse-btn ${openSections.stretches?'open':''}" data-toggle="stretches"><span>Étirements (${stretchDone}/${STRETCHES.length}) · +15 XP</span><span class="arrow">▸</span></button>
-    ${openSections.stretches?`<div class="collapse-body">${STRETCHES.map((s,i)=>{const ck=dd.stretches[i]||false;return `<div class="routine-item ${ck?'done':''}" data-action="stretch" data-day="${idx}" data-idx="${i}"><div class="ex-check"></div><div class="routine-item-name">${s.name}</div><div class="routine-item-target">${s.target}</div></div>`;}).join('')}</div>`:''}
+    ${openSections.stretches?`<div class="collapse-body">${renderRoutineList(STRETCHES,'stretch',idx,dd.stretches)}</div>`:''}
     <button class="collapse-btn ${openSections.yoga?'open':''}" data-toggle="yoga"><span>Yoga 15 min (${yogaDone}/${YOGA.length}) · +20 XP</span><span class="arrow">▸</span></button>
-    ${openSections.yoga?`<div class="collapse-body">${YOGA.map((y,i)=>{const ck=dd.yoga[i]||false;return `<div class="routine-item ${ck?'done':''}" data-action="yoga" data-day="${idx}" data-idx="${i}"><div class="ex-check"></div><div class="routine-item-name">${y.name}</div><div class="routine-item-target">${y.target}</div></div>`;}).join('')}</div>`:''}
+    ${openSections.yoga?`<div class="collapse-body">${renderRoutineList(YOGA,'yoga',idx,dd.yoga)}</div>`:''}
     ${renderVitals(idx, dd)}
   `;
 }
@@ -1039,10 +1489,7 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
             <div class="cardio-step-line"><span class="cardio-step-dur">${ex.dur}</span><span class="exo-tag cardio">CARDIO</span></div>
             <div class="cardio-step-intensity">${ex.intensity}</div>
             ${ex.tip?`<div class="cardio-step-tip">${ex.tip}</div>`:''}
-            <div class="exo-viz" style="padding:8px 0 0 0;">
-              <div class="exo-viz-svg">${vizSVG(ex.viz)}</div>
-              <a class="exo-demo-btn" href="${videoURL(ex.name)}" target="_blank" rel="noopener" data-stop="1"><span class="play">▶</span> Voir la démo</a>
-            </div>
+            ${vizBlock(ex,{stop:true,forceMachine:true})}
           </div>
           <div class="cardio-step-check"></div>
         </div>
@@ -1110,10 +1557,7 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
           <div class="exo-xp">+${ex.xp}</div>
         </div>
         ${ex.tip?`<div class="exo-tip">${ex.tip}</div>`:''}
-        <div class="exo-viz">
-          <div class="exo-viz-svg">${vizSVG(ex.viz)}</div>
-          <a class="exo-demo-btn" href="${videoURL(ex.name)}" target="_blank" rel="noopener"><span class="play">▶</span> Voir la démo vidéo</a>
-        </div>
+        ${vizBlock(ex)}
         ${prevHtml}
         ${setsHtml}
       </div>
@@ -1152,7 +1596,7 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
   // Récup
   html+=`<div class="section-label">Récupération <span class="count">bonus XP</span></div>`;
   html+=`<button class="collapse-btn ${openSections.stretches?'open':''}" data-toggle="stretches"><span>Étirements (${stretchDone}/${STRETCHES.length}) · +15 XP</span><span class="arrow">▸</span></button>`;
-  html+=openSections.stretches?`<div class="collapse-body">${STRETCHES.map((s,i)=>{const ck=dd.stretches[i]||false;return `<div class="routine-item ${ck?'done':''}" data-action="stretch" data-day="${idx}" data-idx="${i}"><div class="ex-check"></div><div class="routine-item-name">${s.name}</div><div class="routine-item-target">${s.target}</div></div>`;}).join('')}</div>`:'';
+  html+=openSections.stretches?`<div class="collapse-body">${renderRoutineList(STRETCHES,'stretch',idx,dd.stretches)}</div>`:'';
 
   html+=renderVitals(idx, dd);
   return html;
@@ -1363,6 +1807,100 @@ function startTimer(sec){
 }
 function stopTimer(){ if(restTimer.interval)clearInterval(restTimer.interval); restTimer.interval=null; restTimer.running=false; updateTimerDisplay(); }
 
+// === HOLD TIMER (étirement / yoga) plein écran ===
+let holdTimer={ interval:null, remaining:0, total:0, phase:0, item:null };
+function openHoldTimer(item){
+  closeHoldTimer();
+  holdTimer.item=item;
+  holdTimer.total=item.secs||30;
+  holdTimer.remaining=holdTimer.total;
+  holdTimer.phase=item.perSide?1:0; // 1 = premier côté, 2 = deuxième
+  renderHoldTimer();
+  startHoldCountdown();
+}
+function startHoldCountdown(){
+  if(holdTimer.interval) clearInterval(holdTimer.interval);
+  beep(440,0.08,0);
+  holdTimer.interval=setInterval(()=>{
+    holdTimer.remaining--;
+    if(holdTimer.remaining<=3 && holdTimer.remaining>0) beep(560,0.08,0);
+    if(holdTimer.remaining<=0){
+      clearInterval(holdTimer.interval); holdTimer.interval=null;
+      finishSound(); if(navigator.vibrate) navigator.vibrate([200,100,200]);
+      if(holdTimer.phase===1){
+        // passer au 2e côté
+        holdTimer.phase=2; holdTimer.remaining=holdTimer.total;
+        updateHoldDisplay(); renderHoldTimer();
+        setTimeout(startHoldCountdown, 800);
+      } else {
+        updateHoldDisplay(true);
+      }
+      return;
+    }
+    updateHoldDisplay();
+  },1000);
+}
+function updateHoldDisplay(finished){
+  const num=document.getElementById('hold-num');
+  const ring=document.getElementById('hold-ring-fg');
+  if(num) num.textContent= finished ? '✓' : holdTimer.remaining;
+  if(ring){
+    const C=2*Math.PI*92;
+    const frac= finished ? 0 : (holdTimer.remaining/holdTimer.total);
+    ring.style.strokeDasharray=C;
+    ring.style.strokeDashoffset=C*(1-frac);
+  }
+}
+function renderHoldTimer(){
+  let ov=document.getElementById('hold-overlay');
+  const it=holdTimer.item; if(!it) return;
+  const C=2*Math.PI*92;
+  const sideLabel = it.perSide ? (holdTimer.phase===1?'CÔTÉ 1 / 2':'CÔTÉ 2 / 2') : '';
+  const html=`
+    <div class="hold-timer-svg">${vizSVG(it.viz)}</div>
+    <div class="hold-timer-name">${it.name}</div>
+    ${sideLabel?`<div class="hold-timer-side">${sideLabel}</div>`:'<div style="height:8px;"></div>'}
+    <div class="hold-ring-wrap">
+      <svg viewBox="0 0 200 200"><circle class="hold-ring-bg" cx="100" cy="100" r="92"/><circle id="hold-ring-fg" class="hold-ring-fg" cx="100" cy="100" r="92" style="stroke-dasharray:${C};stroke-dashoffset:0;"/></svg>
+      <div class="hold-ring-num" id="hold-num">${holdTimer.remaining}</div>
+    </div>
+    <div class="hold-timer-btns">
+      <button class="hold-timer-btn" data-action="hold-close">Fermer</button>
+      <button class="hold-timer-btn done-btn" data-action="hold-done">Terminé ✓</button>
+    </div>
+  `;
+  if(!ov){
+    ov=document.createElement('div'); ov.id='hold-overlay'; ov.className='hold-timer-overlay';
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML=html;
+  updateHoldDisplay();
+  ov.querySelector('[data-action="hold-close"]').addEventListener('click', closeHoldTimer);
+  ov.querySelector('[data-action="hold-done"]').addEventListener('click', ()=>{
+    const kind=holdTimer.kind, idx=holdTimer.dayIdx, i=holdTimer.itemIdx;
+    closeHoldTimer();
+    if(kind!=null && idx!=null) markRoutineDone(kind, idx, i);
+  });
+}
+function closeHoldTimer(){
+  if(holdTimer.interval){ clearInterval(holdTimer.interval); holdTimer.interval=null; }
+  const ov=document.getElementById('hold-overlay'); if(ov) ov.remove();
+}
+// Coche un étirement/yoga (depuis le bouton Terminé du hold timer)
+function markRoutineDone(kind, idx, i){
+  const d=getDay(idx);
+  const map = kind==='stretch' ? d.stretches : d.yoga;
+  if(!map[i]){
+    map[i]=true;
+    const list = kind==='stretch'?STRETCHES:YOGA;
+    const allDone=Object.values(map).filter(Boolean).length===list.length;
+    const flag = kind==='stretch'?'stretchAwarded':'yogaAwarded';
+    const xp = kind==='stretch'?15:20;
+    if(allDone && !d[flag]){ d[flag]=true; awardXP(xp, kind==='stretch'?'Étirements':'Yoga'); }
+    saveProfile(); render();
+  }
+}
+
 // ============================================================
 // LISTENERS
 // ============================================================
@@ -1394,7 +1932,14 @@ function attachListeners() {
       if(!(lastSetOfEx && lastEx)) autoStart=restSec;
     }
     saveProfile(); render();
-    if(autoStart>0) startTimer(autoStart);
+    if(autoStart>0){
+      startTimer(autoStart);
+      // petit scroll fluide vers le chrono pour le voir tout de suite
+      requestAnimationFrame(()=>{
+        const t=document.getElementById('rest-timer');
+        if(t) t.scrollIntoView({ behavior:'smooth', block:'center' });
+      });
+    }
   }));
   // Saisie reps par série
   document.querySelectorAll('[data-action="set-reps"]').forEach(el=>{
@@ -1434,6 +1979,15 @@ function attachListeners() {
   }));
   // Liens démo : empêcher la propagation (ouvrent juste le lien)
   document.querySelectorAll('[data-stop]').forEach(el=>el.addEventListener('click',(e)=>e.stopPropagation()));
+  // Bouton "Lancer" : ouvre le timer plein écran pour l'étirement/yoga
+  document.querySelectorAll('[data-action="hold-timer"]').forEach(el=>el.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const kind=el.dataset.kind, i=parseInt(el.dataset.idx);
+    const list = kind==='stretch'?STRETCHES:YOGA;
+    const item=list[i];
+    holdTimer.kind=kind; holdTimer.dayIdx=getDayIndex(); holdTimer.itemIdx=i;
+    openHoldTimer(item);
+  }));
   document.querySelectorAll('[data-action="stretch"]').forEach(el=>el.addEventListener('click',()=>{
     const idx=parseInt(el.dataset.day), i=el.dataset.idx; const d=getDay(idx);
     const was=d.stretches[i]||false; d.stretches[i]=!was;
