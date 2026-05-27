@@ -104,8 +104,8 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .xp-text .xp-val { color:var(--accent); }
 
 /* TABS */
-.tabs { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-bottom:18px; }
-.tab { padding:10px 4px; font-family:'JetBrains Mono',monospace; font-weight:500; background:transparent; border:1px solid var(--border); color:var(--ink-dim); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:all 0.15s; }
+.tabs { display:grid; grid-template-columns:repeat(5,1fr); gap:3px; margin-bottom:18px; }
+.tab { padding:10px 2px; font-family:'JetBrains Mono',monospace; font-weight:500; background:transparent; border:1px solid var(--border); color:var(--ink-dim); font-size:9px; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; transition:all 0.15s; }
 .tab.active { color:var(--accent); border-color:var(--accent-dim); box-shadow:inset 0 0 12px rgba(5,242,219,0.06), 0 0 6px rgba(5,242,219,0.1); }
 .tab:active { transform:scale(0.96); }
 
@@ -226,6 +226,16 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 @keyframes vcatcow { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px) scaleY(0.95);} }
 .viz-breathe { animation: vbreathe 3.4s ease-in-out infinite; transform-origin:center; }
 @keyframes vbreathe { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.04);opacity:0.82;} }
+.viz-neck { animation:vneck 2.6s ease-in-out infinite; }
+@keyframes vneck { 0%,100%{transform:rotate(-12deg);} 50%{transform:rotate(12deg);} }
+.viz-shoulder-roll { animation:vroll 2s linear infinite; }
+@keyframes vroll { from{transform:rotate(0);} to{transform:rotate(360deg);} }
+.viz-backext { animation:vbackext 2.8s ease-in-out infinite; }
+@keyframes vbackext { 0%,100%{transform:rotate(0deg);} 50%{transform:rotate(-14deg);} }
+.viz-twist-desk { animation:vtwistdesk 2.8s ease-in-out infinite; }
+@keyframes vtwistdesk { 0%,100%{transform:rotate(-10deg);} 50%{transform:rotate(10deg);} }
+.viz-glute { animation:vglute 1.6s ease-in-out infinite; transform-origin:center; }
+@keyframes vglute { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
 
 /* SET ROWS */
 .sets { padding:0 12px 12px 12px; }
@@ -308,6 +318,15 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .hold-timer-svg svg { width:100%; height:100%; }
 .hold-timer-name { font-family:'Orbitron',monospace; font-weight:700; font-size:18px; color:var(--ink); text-align:center; margin-bottom:6px; letter-spacing:0.05em; }
 .hold-timer-side { font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--magenta); margin-bottom:24px; }
+.hold-seq-progress { font-family:'Orbitron',monospace; font-size:11px; letter-spacing:0.2em; color:var(--gold); font-weight:700; margin-bottom:16px; }
+.rest-message { padding:32px 20px; text-align:center; background:var(--bg-2); border:1px solid var(--border); border-radius:8px; margin-bottom:18px; }
+.rest-message-icon { font-size:48px; margin-bottom:14px; opacity:0.7; }
+.rest-message-title { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--ink); margin-bottom:10px; letter-spacing:0.05em; }
+.rest-message-text { font-size:12px; color:var(--ink-dim); line-height:1.65; max-width:320px; margin:0 auto 18px; }
+.rest-message-next { display:inline-block; padding:8px 14px; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.12em; color:var(--accent); border:1px solid var(--accent-dim); border-radius:4px; }
+.discreet-tag { display:inline-block; margin-left:6px; padding:2px 6px; font-family:'JetBrains Mono',monospace; font-size:8px; font-weight:700; letter-spacing:0.1em; border-radius:3px; vertical-align:middle; }
+.discreet-tag.ok { background:rgba(0,255,156,0.12); color:var(--ok); border:1px solid var(--ok); }
+.discreet-tag.warn { background:rgba(255,182,39,0.12); color:var(--amber); border:1px solid var(--amber); }
 .hold-ring-wrap { position:relative; width:200px; height:200px; margin-bottom:28px; }
 .hold-ring-wrap svg { width:100%; height:100%; transform:rotate(-90deg); }
 .hold-ring-bg { fill:none; stroke:var(--bg-3); stroke-width:8; }
@@ -503,7 +522,7 @@ input:focus { outline:none; }
 // >>> NUMÉRO DE VERSION <<<
 // À INCRÉMENTER À CHAQUE FOIS QUE TU DÉPLOIES UNE NOUVELLE VERSION SUR GITHUB.
 // L'app compare ce numéro à celui de version.json et propose la mise à jour.
-const APP_VERSION = 13;
+const APP_VERSION = 15;
 
 const TOTAL_DAYS = 42;
 const STORE_PREFIX = 'ascend_v1_';
@@ -530,37 +549,38 @@ const TRAIN_WEEKDAYS = [1, 4, 6]; // lun, jeu, sam (ordre chronologique dans la 
 // ===== PROFIL PRISE DE MASSE (toi) =====
 const SESSIONS_GAIN = [
   {
-    name: 'UPPER FORCE', sub: 'Haut du corps · Polyarticulaire', xp: 100,
+    name: 'PUSH', sub: 'Pecs · Épaules · Triceps', xp: 100,
     exercises: [
       { name: 'Développé couché haltères', sets:4, reps:'8 reps', machine:false, weighted:true, compound:true, rest:120, vid:'développé couché haltères technique débutant', viz:'bench', xp:22, tip:'EXO ROI du torse. Lourd et contrôlé. Descends jusqu\'à frôler la poitrine.' },
-      { name: 'Tirage vertical (lat pulldown)', sets:4, reps:'8 reps', machine:true, weighted:true, compound:true, rest:120, vid:'tirage vertical poulie haute technique', viz:'pull', xp:22, tip:'EXO ROI du dos. Tire la barre vers le haut du torse, dos en V.' },
+      { name: 'Développé incliné haltères', sets:3, reps:'10 reps', machine:false, weighted:true, compound:true, rest:120, vid:'développé incliné haltères pectoraux haut', viz:'bench', xp:18, tip:'Cible le haut des pecs. Banc à ~30°.' },
       { name: 'Développé militaire', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'développé militaire haltères épaules technique', viz:'press', xp:18, tip:'Construit les épaules larges. Pousse au-dessus de la tête.' },
-      { name: 'Rowing assis poulie', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'rowing assis poulie basse technique dos', viz:'row', xp:16, tip:'Serre les omoplates en fin de tirage.' },
-      { name: 'Curl biceps haltères', sets:3, reps:'12 reps', machine:false, weighted:true, rest:75, vid:'curl biceps haltères technique', viz:'curl', xp:12, tip:'Isolation. Pas d\'élan, mouvement propre.' }
-    ],
-    cardio: { dur:'8 min', machine:'Vélo', intensity:'Allure facile (récup active)', xp:10 }
+      { name: 'Élévations latérales', sets:4, reps:'12-15 reps', machine:false, weighted:true, rest:75, vid:'élévations latérales haltères épaules technique', viz:'lateral', xp:14, tip:'Isolation épaules. Léger et strict = largeur d\'épaules.' },
+      { name: 'Extension triceps poulie', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'extension triceps poulie haute corde', viz:'triceps', xp:14, tip:'Coudes collés au corps.' },
+      { name: 'Cardio doux fin de séance', dur:'8 min', intensity:'Vélo ou tapis · allure facile, récup', cardioStep:true, machine:true, vid:'vélo elliptique récupération salle', viz:'bike', xp:14, tip:'Active la récup, démarre l\'aspect cardio sans cramer le sysème nerveux.' }
+    ]
   },
   {
-    name: 'LOWER POWER', sub: 'Jambes · Polyarticulaire', xp: 100,
+    name: 'PULL', sub: 'Dos · Biceps', xp: 100,
     exercises: [
-      { name: 'Presse à cuisses', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'presse à cuisses machine technique', viz:'press_legs', xp:22, tip:'EXO ROI des jambes. Amplitude complète, pousse avec les talons.' },
-      { name: 'Fentes haltères', sets:3, reps:'10 reps / jambe', machine:false, weighted:true, compound:true, rest:120, vid:'fentes avant haltères technique', viz:'lunge', xp:18, tip:'Genou avant aligné avec la cheville, pas plus loin.' },
-      { name: 'Leg curl (ischios)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'leg curl allongé machine ischio jambiers', viz:'squat', xp:14, tip:'Isolation arrière de cuisse. Contrôle le retour.' },
+      { name: 'Tirage vertical (lat pulldown)', sets:4, reps:'8 reps', machine:true, weighted:true, compound:true, rest:120, vid:'tirage vertical poulie haute technique', viz:'pull', xp:22, tip:'EXO ROI du dos. Tire vers le haut du torse, dos en V.' },
+      { name: 'Rowing assis poulie', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'rowing assis poulie basse technique dos', viz:'row', xp:20, tip:'Serre les omoplates en fin de tirage. Dos large et épais.' },
+      { name: 'Tirage horizontal machine', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:90, vid:'tirage horizontal machine dos technique', viz:'row', xp:16, tip:'Variante pour le milieu du dos. Coudes près du corps.' },
+      { name: 'Curl biceps haltères', sets:3, reps:'10 reps', machine:false, weighted:true, rest:75, vid:'curl biceps haltères technique', viz:'curl', xp:14, tip:'Isolation. Pas d\'élan, mouvement propre.' },
+      { name: 'Curl marteau', sets:3, reps:'12 reps', machine:false, weighted:true, rest:75, vid:'curl marteau haltères biceps avant bras', viz:'curl', xp:14, tip:'Travaille le brachial + avant-bras.' },
+      { name: 'Cardio doux fin de séance', dur:'8 min', intensity:'Vélo ou steppeur · rythme modéré', cardioStep:true, machine:true, vid:'steppeur salle de sport rythme modéré', viz:'walk', xp:14, tip:'Aide la circulation post-séance dos.' }
+    ]
+  },
+  {
+    name: 'LEGS', sub: 'Quadris · Fessiers · Ischios · Mollets', xp: 110,
+    exercises: [
+      { name: 'Presse à cuisses', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'presse à cuisses machine technique', viz:'press_legs', xp:24, tip:'EXO ROI des jambes. Amplitude complète, pousse avec les talons.' },
+      { name: 'Fentes haltères', sets:3, reps:'10 reps / jambe', machine:false, weighted:true, compound:true, rest:120, vid:'fentes avant haltères technique', viz:'lunge', xp:20, tip:'Genou avant aligné avec la cheville. Quadris + fessiers.' },
+      { name: 'Leg extension (quadris)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'leg extension machine quadriceps technique', viz:'squat', xp:14, tip:'Isolation avant de cuisse. Contrôle.' },
+      { name: 'Leg curl (ischios)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'leg curl allongé machine ischio jambiers', viz:'squat', xp:14, tip:'Isolation arrière de cuisse. Indispensable pour équilibrer.' },
       { name: 'Mollets debout', sets:4, reps:'15 reps', machine:true, weighted:true, rest:75, vid:'extension mollets debout machine', viz:'calf', xp:12, tip:'Monte sur la pointe, pause 1s en haut.' },
-      { name: 'Gainage planche', sets:3, reps:'45 secondes', machine:false, weighted:false, rest:60, vid:'gainage planche position correcte', viz:'plank', xp:14, tip:'Corps gainé, pas de creux dans le bas du dos.' }
-    ],
-    cardio: { dur:'8 min', machine:'Steppeur', intensity:'Rythme modéré constant', xp:10 }
-  },
-  {
-    name: 'PUSH VOLUME', sub: 'Pecs · Épaules · Triceps', xp: 100,
-    exercises: [
-      { name: 'Développé incliné haltères', sets:4, reps:'10 reps', machine:false, weighted:true, compound:true, rest:120, vid:'développé incliné haltères pectoraux haut', viz:'bench', xp:20, tip:'EXO DE BASE. Cible le haut des pecs. Banc incliné à ~30°.' },
-      { name: 'Dips ou développé machine', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'dips machine triceps pectoraux technique', viz:'press', xp:18, tip:'Polyarticulaire pecs/triceps. Descends contrôlé.' },
-      { name: 'Élévations latérales', sets:4, reps:'15 reps', machine:false, weighted:true, rest:75, vid:'élévations latérales haltères épaules technique', viz:'lateral', xp:16, tip:'Isolation épaules. Léger et strict = largeur d\'épaules.' },
-      { name: 'Pec deck (écarté machine)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'pec deck machine écarté pectoraux', viz:'fly', xp:13, tip:'Isolation pecs. Étire bien en ouverture.' },
-      { name: 'Extension triceps poulie', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'extension triceps poulie haute corde', viz:'triceps', xp:13, tip:'Coudes collés au corps.' }
-    ],
-    cardio: { dur:'10 min', machine:'Vélo', intensity:'Intervalles : 30s fort / 90s facile', xp:12 }
+      { name: 'Gainage planche', sets:3, reps:'45 sec', machine:false, weighted:false, rest:60, vid:'gainage planche position correcte', viz:'plank', xp:12, tip:'Corps gainé, pas de creux dans le bas du dos.' },
+      { name: 'Cardio fin de séance', dur:'10 min', intensity:'Vélo facile · jambes lourdes, vas-y doux', cardioStep:true, machine:true, vid:'vélo récupération jambes lourdes', viz:'bike', xp:14, tip:'Décongestionne les jambes après le travail lourd.' }
+    ]
   }
 ];
 
@@ -627,6 +647,21 @@ const YOGA = [
   { name:'Posture de l\'enfant', target:'60 sec', viz:'yoga_child', secs:60, vid:'posture de l enfant yoga' },
   { name:'Torsion couchée', target:'60s / côté', viz:'yoga_twist', secs:60, perSide:true, vid:'torsion couchée yoga étirement' },
   { name:'Savasana', target:'3 min', viz:'yoga_savasana', secs:180, vid:'savasana relaxation yoga' }
+];
+
+// === EXOS DESK (à faire assis pendant le grind poker) ===
+// Routine courte tout-en-un : mobilité + circulation + renfo discret.
+const DESK = [
+  { name:'Rétractions d\'omoplates', target:'15 reps', viz:'desk_scap', secs:30, discreet:true, vid:'rétraction omoplates assis bureau' },
+  { name:'Étirement nuque (côtés)', target:'20s / côté', viz:'desk_neck', secs:20, perSide:true, discreet:true, vid:'étirement nuque cou bureau' },
+  { name:'Rotations d\'épaules', target:'10 avant / 10 arrière', viz:'desk_shoulder', secs:30, discreet:true, vid:'rotation épaules assis' },
+  { name:'Extension du dos sur la chaise', target:'5 reps lentes', viz:'desk_backext', secs:30, discreet:false, vid:'extension dos chaise bureau' },
+  { name:'Rotation du buste', target:'20s / côté', viz:'desk_twist', secs:20, perSide:true, discreet:false, vid:'rotation buste assis étirement' },
+  { name:'Étirement fléchisseurs de hanche', target:'25s / côté', viz:'desk_hipflex', secs:25, perSide:true, discreet:false, vid:'étirement fléchisseur hanche assis' },
+  { name:'Contractions de fessiers', target:'15 reps', viz:'desk_glute', secs:30, discreet:true, vid:'contraction fessiers assis discret' },
+  { name:'Levées de mollets sous la table', target:'20 reps', viz:'desk_calf', secs:30, discreet:true, vid:'levée mollets assis bureau' },
+  { name:'Roulements de poignets & chevilles', target:'10 / sens', viz:'desk_wrist', secs:30, discreet:true, vid:'mobilité poignets chevilles' },
+  { name:'Repos des yeux (20-20-20)', target:'20 sec', viz:'desk_eyes', secs:20, discreet:true, vid:'règle 20 20 20 yeux écran' }
 ];
 
 // Définition des profils
@@ -1104,6 +1139,89 @@ function vizSVG(viz) {
         <text x="60" y="50" text-anchor="middle" fill="var(--ink-faint)" font-size="11" font-family="monospace">zZ</text>
       </svg>`;
 
+    // === EXOS DESK (personnage assis sur une chaise) ===
+    // Base commune : chaise + personne assise. On anime la partie concernée.
+    case 'desk_scap': // rétraction omoplates
+      return `<svg viewBox="0 0 120 120">
+        <line x1="40" y1="60" x2="40" y2="104" stroke="var(--border-bright)" stroke-width="3"/><line x1="40" y1="78" x2="76" y2="78" stroke="var(--border-bright)" stroke-width="3"/>
+        ${head(58,42)}
+        <line x1="58" y1="49" x2="58" y2="78" ${B}/>
+        <g class="viz-fly" style="transform-origin:58px 58px;">
+          <line x1="58" y1="58" x2="42" y2="50" ${A}/><line x1="58" y1="58" x2="74" y2="50" ${A}/>
+        </g>
+      </svg>`;
+    case 'desk_neck': // étirement nuque
+      return `<svg viewBox="0 0 120 120">
+        <line x1="40" y1="60" x2="40" y2="104" stroke="var(--border-bright)" stroke-width="3"/><line x1="40" y1="78" x2="76" y2="78" stroke="var(--border-bright)" stroke-width="3"/>
+        <line x1="58" y1="50" x2="58" y2="78" ${B}/>
+        <g class="viz-neck" style="transform-origin:58px 50px;">${head(58,42)}</g>
+        <line x1="58" y1="58" x2="46" y2="70" ${B}/><line x1="58" y1="58" x2="70" y2="70" ${B}/>
+      </svg>`;
+    case 'desk_shoulder': // rotations épaules
+      return `<svg viewBox="0 0 120 120">
+        <line x1="40" y1="60" x2="40" y2="104" stroke="var(--border-bright)" stroke-width="3"/><line x1="40" y1="78" x2="76" y2="78" stroke="var(--border-bright)" stroke-width="3"/>
+        ${head(58,42)}<line x1="58" y1="49" x2="58" y2="78" ${B}/>
+        <g class="viz-shoulder-roll" style="transform-origin:48px 56px;"><circle cx="48" cy="56" r="5" fill="none" ${A}/></g>
+        <g class="viz-shoulder-roll" style="transform-origin:68px 56px;"><circle cx="68" cy="56" r="5" fill="none" ${A}/></g>
+      </svg>`;
+    case 'desk_backext': // extension dos sur chaise
+      return `<svg viewBox="0 0 120 120">
+        <line x1="42" y1="60" x2="42" y2="104" stroke="var(--border-bright)" stroke-width="3"/><line x1="42" y1="80" x2="78" y2="80" stroke="var(--border-bright)" stroke-width="3"/>
+        <g class="viz-backext" style="transform-origin:58px 80px;">
+          ${head(58,40)}<line x1="58" y1="47" x2="58" y2="80" ${A}/>
+        </g>
+        <line x1="58" y1="80" x2="80" y2="92" ${B}/>
+      </svg>`;
+    case 'desk_twist': // rotation buste
+      return `<svg viewBox="0 0 120 120">
+        <line x1="40" y1="60" x2="40" y2="104" stroke="var(--border-bright)" stroke-width="3"/><line x1="40" y1="78" x2="76" y2="78" stroke="var(--border-bright)" stroke-width="3"/>
+        ${head(58,42)}<line x1="58" y1="49" x2="58" y2="78" ${B}/>
+        <g class="viz-twist-desk" style="transform-origin:58px 60px;">
+          <line x1="58" y1="58" x2="76" y2="64" ${A}/><line x1="58" y1="58" x2="44" y2="52" ${A}/>
+        </g>
+      </svg>`;
+    case 'desk_hipflex': // étirement fléchisseur de hanche (genou levé)
+      return `<svg viewBox="0 0 120 120">
+        <line x1="38" y1="58" x2="38" y2="104" stroke="var(--border-bright)" stroke-width="3"/><line x1="38" y1="76" x2="74" y2="76" stroke="var(--border-bright)" stroke-width="3"/>
+        ${head(56,40)}<line x1="56" y1="47" x2="56" y2="76" ${B}/>
+        <g class="viz-breathe">
+          <line x1="56" y1="76" x2="80" y2="64" ${A}/><line x1="80" y1="64" x2="84" y2="86" ${A}/>
+        </g>
+        <line x1="56" y1="76" x2="50" y2="100" ${B}/>
+      </svg>`;
+    case 'desk_glute': // contraction fessiers
+      return `<svg viewBox="0 0 120 120">
+        <line x1="40" y1="60" x2="40" y2="104" stroke="var(--border-bright)" stroke-width="3"/>
+        <g class="viz-glute"><line x1="40" y1="80" x2="78" y2="80" stroke="var(--magenta)" stroke-width="5" stroke-linecap="round"/></g>
+        ${head(58,44)}<line x1="58" y1="51" x2="58" y2="80" ${B}/>
+        <line x1="58" y1="80" x2="54" y2="104" ${B}/><line x1="62" y1="80" x2="66" y2="104" ${B}/>
+      </svg>`;
+    case 'desk_calf': // levées mollets sous la table
+      return `<svg viewBox="0 0 120 120">
+        <line x1="40" y1="56" x2="40" y2="84" stroke="var(--border-bright)" stroke-width="3"/><line x1="40" y1="72" x2="76" y2="72" stroke="var(--border-bright)" stroke-width="3"/>
+        ${head(58,38)}<line x1="58" y1="45" x2="58" y2="72" ${B}/>
+        <line x1="58" y1="72" x2="58" y2="90" ${B}/>
+        <g class="viz-calf" style="transform-origin:58px 104px;">
+          <line x1="50" y1="100" x2="58" y2="90" ${A}/><line x1="50" y1="104" x2="58" y2="104" ${A}/>
+        </g>
+      </svg>`;
+    case 'desk_wrist': // roulements poignets/chevilles
+      return `<svg viewBox="0 0 120 120">
+        <g class="viz-pedal" style="transform-origin:42px 50px;"><circle cx="42" cy="50" r="12" fill="none" ${A}/><line x1="42" y1="50" x2="42" y2="40" ${A}/></g>
+        <g class="viz-pedal" style="transform-origin:80px 84px;"><circle cx="80" cy="84" r="12" fill="none" ${A}/><line x1="80" y1="84" x2="80" y2="74" ${A}/></g>
+        <text x="42" y="78" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="monospace">poignet</text>
+        <text x="80" y="108" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="monospace">cheville</text>
+      </svg>`;
+    case 'desk_eyes': // repos des yeux
+      return `<svg viewBox="0 0 120 120">
+        <g class="viz-breathe">
+          <ellipse cx="60" cy="56" rx="34" ry="20" fill="none" ${A}/>
+          <circle cx="60" cy="56" r="9" fill="var(--ink-dim)"/>
+          <circle cx="60" cy="56" r="4" fill="var(--accent)"/>
+        </g>
+        <text x="60" y="92" text-anchor="middle" fill="var(--ink-faint)" font-size="10" font-family="monospace">regarde au loin</text>
+      </svg>`;
+
     default:
       return `<svg viewBox="0 0 120 120">
         ${floor(108)}
@@ -1148,12 +1266,18 @@ function vizBlock(ex, opts){
 function renderRoutineList(items, kind, idx, doneMap){
   return items.map((it,i)=>{
     const ck=doneMap[i]||false;
+    let discreetTag='';
+    if(kind==='desk' && it.discreet!==undefined){
+      discreetTag = it.discreet
+        ? '<span class="discreet-tag ok">DISCRET</span>'
+        : '<span class="discreet-tag warn">VISIBLE</span>';
+    }
     return `
       <div class="stretch-card ${ck?'done':''}">
         <div class="stretch-head">
           <div class="stretch-svg">${vizSVG(it.viz)}</div>
           <div class="stretch-info">
-            <div class="stretch-name">${it.name}</div>
+            <div class="stretch-name">${it.name}${discreetTag}</div>
             <div class="stretch-target">${it.target}</div>
             <div class="stretch-btns">
               <button class="stretch-btn timer" data-action="hold-timer" data-kind="${kind}" data-idx="${i}"><span class="ic">${IC_TIMER}</span>Lancer</button>
@@ -1277,13 +1401,14 @@ function awardXP(amount, label) {
 // Validation explicite de la séance : donne le bonus, verrouille
 function validateSession(idx) {
   const d=getDay(idx);
-  const sess=sessionForDay(idx);
+  const sess=sessionForCard(idx);
   if(!sess || d.validated) return;
-  const total=sess.exercises.length;
-  const done=Object.values(d.exercises).filter(Boolean).length;
-  if(done<total) return; // sécurité
+  // Compte les exos finis via exDone (séries cochées), comme renderTrainDay
+  let done=0;
+  sess.exercises.forEach((ex,i)=>{ if(exDone(d,ex,i)) done++; });
+  if(done<sess.exercises.length) return; // sécurité
   d.validated=true;
-  awardXP(sess.xp, 'SÉANCE '+sess.name);
+  if(idx<900) awardXP(sess.xp, 'SÉANCE '+sess.name);
   if(navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
   saveProfile();
   render();
@@ -1398,6 +1523,7 @@ function render() {
     </header>
     <nav class="tabs">
       <button class="tab ${currentView==='today'?'active':''}" data-tab="today">Quête</button>
+      <button class="tab ${currentView==='desk'?'active':''}" data-tab="desk">Desk</button>
       <button class="tab ${currentView==='week'?'active':''}" data-tab="week">Semaine</button>
       <button class="tab ${currentView==='stats'?'active':''}" data-tab="stats">Progrès</button>
       <button class="tab ${currentView==='guide'?'active':''}" data-tab="guide">Intel</button>
@@ -1465,9 +1591,59 @@ function renderTestCatalogue(){
 
 function renderContent(todayIdx) {
   if(currentView==='today') return renderToday(todayIdx);
+  if(currentView==='desk') return renderDesk();
   if(currentView==='week') return renderWeek(getDayIndex());
   if(currentView==='stats') return renderStats(getDayIndex());
   if(currentView==='guide') return renderGuide();
+}
+
+// Onglet DESK : routine assise pour le grind poker
+function renderDesk(){
+  const reminderOn = state.deskReminder===true;
+  const casinoMode = state.deskCasinoMode===true;
+  const list = casinoMode ? DESK.filter(d=>d.discreet) : DESK;
+  const totalSecs = list.reduce((a,d)=>a+(d.secs||30)*(d.perSide?2:1),0);
+  const mins = Math.max(1, Math.round(totalSecs/60));
+  // Reprise : si une routine a été interrompue et qu'elle n'est pas finie
+  const resume = state.deskRoutineProgress;
+  const canResume = resume && typeof resume.idx==='number' && resume.idx < (resume.length||0);
+  return `
+    <div class="banner" style="border-color:var(--magenta-dim);background:linear-gradient(135deg,rgba(240,65,255,0.06),rgba(5,242,219,0.02));box-shadow:0 0 16px rgba(240,65,255,0.06);">
+      <span class="banner-corner tl" style="border-color:var(--magenta);"></span><span class="banner-corner tr" style="border-color:var(--magenta);"></span><span class="banner-corner bl" style="border-color:var(--magenta);"></span><span class="banner-corner br" style="border-color:var(--magenta);"></span>
+      <div class="banner-id">PAUSE GRIND · ${mins} MIN</div>
+      <div class="banner-title" style="color:var(--magenta);text-shadow:0 0 8px rgba(240,65,255,0.4);">DESK MODE</div>
+      <div class="banner-sub">Contre la position assise prolongée · à faire entre les mains</div>
+    </div>
+
+    <div class="test-intro" style="border-left-color:var(--magenta);">
+      Tu grindes des heures assis ? Cette routine décompresse le dos, la nuque et les hanches, relance la circulation et repose les yeux. Pause possible à tout moment, reprise à l'exo où tu étais.
+    </div>
+
+    <div class="metric ${casinoMode?'on':''}" data-action="desk-casino" style="margin-bottom:8px;cursor:pointer;">
+      <div class="metric-label">// MODE CASINO LIVE</div>
+      <div class="metric-value">${casinoMode?'ACTIVÉ · ne montre que les exos discrets':'— tous les exos affichés'}</div>
+      <div class="metric-hint">Filtre les mouvements voyants. Tape pour ${casinoMode?'tout afficher':'activer'}.</div>
+    </div>
+
+    ${canResume?`
+      <button class="validate-btn" data-action="desk-resume" style="background:linear-gradient(135deg,var(--amber),var(--gold));color:var(--bg);box-shadow:0 0 14px var(--gold);margin-bottom:8px;">
+        REPRENDRE LA ROUTINE<span class="vb-sub">Exo ${resume.idx+1}/${resume.length} · ${list[resume.idx]?list[resume.idx].name:'—'}</span>
+      </button>
+    `:''}
+
+    <button class="validate-btn" data-action="desk-start" style="background:linear-gradient(135deg,var(--magenta-dim),var(--magenta));box-shadow:0 0 16px var(--magenta);margin-bottom:8px;">
+      ${canResume?'RECOMMENCER':'LANCER LA ROUTINE GUIDÉE'}<span class="vb-sub">${list.length} exos enchaînés · ${mins} min · +30 XP</span>
+    </button>
+
+    <div class="metric ${reminderOn?'on':''}" data-action="desk-reminder" style="margin-bottom:18px;cursor:pointer;">
+      <div class="metric-label">// RAPPEL PENDANT LE GRIND</div>
+      <div class="metric-value">${reminderOn?'ACTIVÉ · toutes les 45 min':'— désactivé'}</div>
+      <div class="metric-hint">Une alerte discrète te rappelle de bouger. Tape pour ${reminderOn?'couper':'activer'}.</div>
+    </div>
+
+    <div class="section-label" style="color:var(--magenta);">${casinoMode?'Exos discrets':'Les exercices'} <span class="count">${list.length}</span></div>
+    ${renderRoutineList(list,'desk',960,getDay(960).deskDone||{})}
+  `;
 }
 
 function renderToday(todayIdx) {
@@ -1518,25 +1694,53 @@ function renderRestDay(idx, dayLabel, date, weekNum, phase, isOff) {
   const dd=getDay(idx);
   const stretchDone=Object.values(dd.stretches||{}).filter(Boolean).length;
   const yogaDone=Object.values(dd.yoga||{}).filter(Boolean).length;
-  // isOff=true => mercredi repos total. isOff=false => jour d'étirements (mar/ven/dim).
+  // Jour de repos total (mercredi) : rien à faire, on l'affiche clairement.
+  if(isOff){
+    return `
+      <div class="banner rest">
+        <span class="banner-corner tl"></span><span class="banner-corner tr"></span><span class="banner-corner bl"></span><span class="banner-corner br"></span>
+        <div class="banner-id">${dayLabel} · ${fmtDate(date)} · SEM ${String(weekNum).padStart(2,'0')}</div>
+        <div class="banner-title">REPOS TOTAL</div>
+        <div class="banner-sub">Pas de sport aujourd'hui</div>
+      </div>
+      <div class="rest-message">
+        <div class="rest-message-icon">💤</div>
+        <div class="rest-message-title">Profite de ta journée</div>
+        <div class="rest-message-text">Aucune séance prévue. Le muscle se construit pendant le repos, pas pendant l'effort. Mange bien, dors bien, et reviens en forme demain.</div>
+        <div class="rest-message-next">Prochaine séance : ${nextTrainLabel(idx)}</div>
+      </div>
+    `;
+  }
+  // Jour d'étirements (mar/ven/dim) : routine mobilité comme tâche du jour
   return `
     <div class="banner rest">
       <span class="banner-corner tl"></span><span class="banner-corner tr"></span><span class="banner-corner bl"></span><span class="banner-corner br"></span>
       <div class="banner-id">${dayLabel} · ${fmtDate(date)} · SEM ${String(weekNum).padStart(2,'0')}</div>
-      <div class="banner-title">${isOff?'REPOS TOTAL':'ÉTIREMENTS'}</div>
-      <div class="banner-sub">${isOff?'Pas de sport · Le corps se reconstruit':'Jour de souplesse · Garde le corps mobile'}</div>
+      <div class="banner-title">ÉTIREMENTS</div>
+      <div class="banner-sub">Jour de souplesse · Garde le corps mobile</div>
     </div>
     <div class="phase-note" style="padding:11px 14px;margin-bottom:18px;background:var(--bg-2);border:1px solid var(--border);border-left:2px solid var(--amber);">
-      <div style="font-size:9px;letter-spacing:0.2em;color:var(--amber);text-transform:uppercase;margin-bottom:3px;font-weight:700;">${isOff?'JOUR DE REPOS':phase.label}</div>
-      <div style="font-size:11px;color:var(--ink-dim);line-height:1.6;">${isOff?'Aucune séance aujourd\'hui. Repos complet : c\'est là que le muscle se construit. Mange bien et dors bien.':'Pas de sport, mais 10 min d\'étirements ou de yoga te font gagner en souplesse et préviennent les blessures. Coche ce que tu fais.'}</div>
+      <div style="font-size:9px;letter-spacing:0.2em;color:var(--amber);text-transform:uppercase;margin-bottom:3px;font-weight:700;">${phase.label}</div>
+      <div style="font-size:11px;color:var(--ink-dim);line-height:1.6;">Pas de sport, mais 10 min d'étirements ou de yoga te font gagner en souplesse et préviennent les blessures.</div>
     </div>
-    <div class="section-label">${isOff?'Mobilité (optionnel)':'Programme du jour'} <span class="count">+XP</span></div>
+    <div class="section-label">Programme du jour <span class="count">+XP</span></div>
     <button class="collapse-btn ${openSections.stretches?'open':''}" data-toggle="stretches"><span>Étirements (${stretchDone}/${STRETCHES.length}) · +15 XP</span><span class="arrow">▸</span></button>
     ${openSections.stretches?`<div class="collapse-body">${renderRoutineList(STRETCHES,'stretch',idx,dd.stretches)}</div>`:''}
     <button class="collapse-btn ${openSections.yoga?'open':''}" data-toggle="yoga"><span>Yoga 15 min (${yogaDone}/${YOGA.length}) · +20 XP</span><span class="arrow">▸</span></button>
     ${openSections.yoga?`<div class="collapse-body">${renderRoutineList(YOGA,'yoga',idx,dd.yoga)}</div>`:''}
     ${renderVitals(idx, dd)}
   `;
+}
+// Trouve la date du prochain jour d'entraînement à partir d'un index donné
+function nextTrainLabel(fromIdx){
+  for(let i=fromIdx+1;i<fromIdx+8;i++){
+    if(dayTypeForDay(i)==='train'){
+      const d=dateForDay(i);
+      const wd=WEEKDAY_FR[weekdayForDay(i)];
+      return wd+' '+fmtDate(d);
+    }
+  }
+  return '—';
 }
 
 // Carte d'un exercice (cardio step ou muscu avec séries), telle qu'affichée en daily.
@@ -1889,13 +2093,54 @@ function startTimer(sec){
 function stopTimer(){ if(restTimer.interval)clearInterval(restTimer.interval); restTimer.interval=null; restTimer.running=false; updateTimerDisplay(); }
 
 // === HOLD TIMER (étirement / yoga) plein écran ===
-let holdTimer={ interval:null, remaining:0, total:0, phase:0, item:null };
+let holdTimer={ interval:null, remaining:0, total:0, phase:0, item:null, sequence:null, seqIdx:0 };
 function openHoldTimer(item){
   closeHoldTimer();
+  holdTimer.sequence=null;
   holdTimer.item=item;
   holdTimer.total=item.secs||30;
   holdTimer.remaining=holdTimer.total;
-  holdTimer.phase=item.perSide?1:0; // 1 = premier côté, 2 = deuxième
+  holdTimer.phase=item.perSide?1:0;
+  renderHoldTimer();
+  startHoldCountdown();
+}
+// Routine guidée : enchaîne la liste DESK (filtrée selon le mode casino)
+function deskList(){ return state.deskCasinoMode ? DESK.filter(d=>d.discreet) : DESK; }
+function startDeskRoutine(){
+  closeHoldTimer();
+  holdTimer.sequence=deskList();
+  holdTimer.seqIdx=0;
+  state.deskRoutineProgress = { idx:0, length:holdTimer.sequence.length, casino:!!state.deskCasinoMode };
+  saveProfile();
+  loadSeqItem();
+}
+function resumeDeskRoutine(){
+  if(!state.deskRoutineProgress) return startDeskRoutine();
+  closeHoldTimer();
+  const list = state.deskRoutineProgress.casino ? DESK.filter(d=>d.discreet) : DESK;
+  holdTimer.sequence=list;
+  holdTimer.seqIdx=Math.min(state.deskRoutineProgress.idx, list.length-1);
+  loadSeqItem();
+}
+// Rappel discret pendant le grind (fonctionne uniquement app ouverte : pas de push système).
+let deskReminderTimer=null;
+function scheduleDeskReminder(){
+  clearDeskReminder();
+  deskReminderTimer=setInterval(()=>{
+    if(navigator.vibrate) navigator.vibrate([120,60,120]);
+    beep(660,0.12,0); beep(520,0.12,0.14);
+    showToast('🪑 Pause grind : 2 min pour bouger ? Onglet Desk', 'badge');
+  }, 45*60*1000); // toutes les 45 min
+}
+function clearDeskReminder(){
+  if(deskReminderTimer){ clearInterval(deskReminderTimer); deskReminderTimer=null; }
+}
+function loadSeqItem(){
+  const item=holdTimer.sequence[holdTimer.seqIdx];
+  holdTimer.item=item;
+  holdTimer.total=item.secs||30;
+  holdTimer.remaining=holdTimer.total;
+  holdTimer.phase=item.perSide?1:0;
   renderHoldTimer();
   startHoldCountdown();
 }
@@ -1909,10 +2154,18 @@ function startHoldCountdown(){
       clearInterval(holdTimer.interval); holdTimer.interval=null;
       finishSound(); if(navigator.vibrate) navigator.vibrate([200,100,200]);
       if(holdTimer.phase===1){
-        // passer au 2e côté
         holdTimer.phase=2; holdTimer.remaining=holdTimer.total;
         updateHoldDisplay(); renderHoldTimer();
         setTimeout(startHoldCountdown, 800);
+      } else if(holdTimer.sequence){
+        // enchaîner l'exo suivant de la routine
+        holdTimer.seqIdx++;
+        if(holdTimer.seqIdx < holdTimer.sequence.length){
+          if(state.deskRoutineProgress){ state.deskRoutineProgress.idx=holdTimer.seqIdx; saveProfile(); }
+          setTimeout(loadSeqItem, 900);
+        } else {
+          finishDeskRoutine();
+        }
       } else {
         updateHoldDisplay(true);
       }
@@ -1920,6 +2173,26 @@ function startHoldCountdown(){
     }
     updateHoldDisplay();
   },1000);
+}
+function finishDeskRoutine(){
+  const d=getDay(960);
+  if(!d.deskDone) d.deskDone={};
+  DESK.forEach((_,i)=>d.deskDone[i]=true);
+  awardXP(30, 'Routine Desk');
+  if(navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
+  state.deskRoutineProgress=null; // routine finie, plus de reprise
+  saveProfile();
+  // écran de fin
+  const ov=document.getElementById('hold-overlay');
+  if(ov){
+    ov.innerHTML=`
+      <div class="hold-timer-name" style="color:var(--ok);">ROUTINE TERMINÉE ✓</div>
+      <div class="hold-timer-side">+30 XP · bien joué, retourne grinder</div>
+      <div class="hold-ring-wrap"><div class="hold-ring-num" style="color:var(--ok);font-size:64px;">✓</div></div>
+      <div class="hold-timer-btns"><button class="hold-timer-btn done-btn" data-action="hold-close">Fermer</button></div>
+    `;
+    ov.querySelector('[data-action="hold-close"]').addEventListener('click', ()=>{ closeHoldTimer(); render(); });
+  }
 }
 function updateHoldDisplay(finished){
   const num=document.getElementById('hold-num');
@@ -1937,18 +2210,23 @@ function renderHoldTimer(){
   const it=holdTimer.item; if(!it) return;
   const C=2*Math.PI*92;
   const sideLabel = it.perSide ? (holdTimer.phase===1?'CÔTÉ 1 / 2':'CÔTÉ 2 / 2') : '';
+  const inSeq = !!holdTimer.sequence;
+  const seqInfo = inSeq ? `<div class="hold-seq-progress">EXERCICE ${holdTimer.seqIdx+1} / ${holdTimer.sequence.length}</div>` : '';
+  const btns = inSeq
+    ? `<button class="hold-timer-btn" data-action="hold-close">Arrêter</button>
+       <button class="hold-timer-btn primary" data-action="hold-skip">Passer ▸</button>`
+    : `<button class="hold-timer-btn" data-action="hold-close">Fermer</button>
+       <button class="hold-timer-btn done-btn" data-action="hold-done">Terminé ✓</button>`;
   const html=`
+    ${seqInfo}
     <div class="hold-timer-svg">${vizSVG(it.viz)}</div>
     <div class="hold-timer-name">${it.name}</div>
-    ${sideLabel?`<div class="hold-timer-side">${sideLabel}</div>`:'<div style="height:8px;"></div>'}
+    <div class="hold-timer-side">${sideLabel||it.target}</div>
     <div class="hold-ring-wrap">
       <svg viewBox="0 0 200 200"><circle class="hold-ring-bg" cx="100" cy="100" r="92"/><circle id="hold-ring-fg" class="hold-ring-fg" cx="100" cy="100" r="92" style="stroke-dasharray:${C};stroke-dashoffset:0;"/></svg>
       <div class="hold-ring-num" id="hold-num">${holdTimer.remaining}</div>
     </div>
-    <div class="hold-timer-btns">
-      <button class="hold-timer-btn" data-action="hold-close">Fermer</button>
-      <button class="hold-timer-btn done-btn" data-action="hold-done">Terminé ✓</button>
-    </div>
+    <div class="hold-timer-btns">${btns}</div>
   `;
   if(!ov){
     ov=document.createElement('div'); ov.id='hold-overlay'; ov.className='hold-timer-overlay';
@@ -1956,11 +2234,21 @@ function renderHoldTimer(){
   }
   ov.innerHTML=html;
   updateHoldDisplay();
-  ov.querySelector('[data-action="hold-close"]').addEventListener('click', closeHoldTimer);
-  ov.querySelector('[data-action="hold-done"]').addEventListener('click', ()=>{
+  ov.querySelector('[data-action="hold-close"]').addEventListener('click', ()=>{ closeHoldTimer(); render(); });
+  const doneBtn=ov.querySelector('[data-action="hold-done"]');
+  if(doneBtn) doneBtn.addEventListener('click', ()=>{
     const kind=holdTimer.kind, idx=holdTimer.dayIdx, i=holdTimer.itemIdx;
     closeHoldTimer();
     if(kind!=null && idx!=null) markRoutineDone(kind, idx, i);
+  });
+  const skipBtn=ov.querySelector('[data-action="hold-skip"]');
+  if(skipBtn) skipBtn.addEventListener('click', ()=>{
+    if(holdTimer.interval){ clearInterval(holdTimer.interval); holdTimer.interval=null; }
+    holdTimer.seqIdx++;
+    if(holdTimer.seqIdx < holdTimer.sequence.length){
+      if(state.deskRoutineProgress){ state.deskRoutineProgress.idx=holdTimer.seqIdx; saveProfile(); }
+      loadSeqItem();
+    } else { finishDeskRoutine(); }
   });
 }
 function closeHoldTimer(){
@@ -1970,11 +2258,11 @@ function closeHoldTimer(){
 // Coche un étirement/yoga (depuis le bouton Terminé du hold timer)
 function markRoutineDone(kind, idx, i){
   const d=getDay(idx);
-  const map = kind==='stretch' ? d.stretches : d.yoga;
+  const map = kind==='stretch' ? d.stretches : (kind==='yoga' ? d.yoga : (d.deskDone||(d.deskDone={})));
   if(!map[i]){
     map[i]=true;
     if(idx<900){
-      const list = kind==='stretch'?STRETCHES:YOGA;
+      const list = (kind==='stretch'?STRETCHES:(kind==='yoga'?YOGA:DESK));
       const allDone=Object.values(map).filter(Boolean).length===list.length;
       const flag = kind==='stretch'?'stretchAwarded':'yogaAwarded';
       const xp = kind==='stretch'?15:20;
@@ -2079,9 +2367,9 @@ function attachListeners() {
   document.querySelectorAll('[data-action="hold-timer"]').forEach(el=>el.addEventListener('click',(e)=>{
     e.stopPropagation();
     const kind=el.dataset.kind, i=parseInt(el.dataset.idx);
-    const list = kind==='stretch'?STRETCHES:YOGA;
+    const list = (kind==='stretch'?STRETCHES:(kind==='yoga'?YOGA:DESK));
     const item=list[i];
-    holdTimer.kind=kind; holdTimer.dayIdx=(previewDay!==null?(kind==='stretch'?950:951):getDayIndex()); holdTimer.itemIdx=i;
+    holdTimer.kind=kind; holdTimer.dayIdx=(kind==='desk'?960:(previewDay!==null?(kind==='stretch'?950:951):getDayIndex())); holdTimer.itemIdx=i;
     openHoldTimer(item);
   }));
   document.querySelectorAll('[data-action="stretch"]').forEach(el=>el.addEventListener('click',()=>{
@@ -2104,6 +2392,26 @@ function attachListeners() {
     }
     saveProfile(); render();
   }));
+  document.querySelectorAll('[data-action="desk"]').forEach(el=>el.addEventListener('click',()=>{
+    const idx=parseInt(el.dataset.day), i=el.dataset.idx; const d=getDay(idx);
+    if(!d.deskDone) d.deskDone={};
+    d.deskDone[i]=!d.deskDone[i];
+    saveProfile(); render();
+  }));
+  const deskStart=document.querySelector('[data-action="desk-start"]');
+  if(deskStart) deskStart.addEventListener('click',()=>{ startDeskRoutine(); });
+  const deskResume=document.querySelector('[data-action="desk-resume"]');
+  if(deskResume) deskResume.addEventListener('click',()=>{ resumeDeskRoutine(); });
+  const deskCasino=document.querySelector('[data-action="desk-casino"]');
+  if(deskCasino) deskCasino.addEventListener('click',()=>{
+    state.deskCasinoMode=!state.deskCasinoMode; saveProfile(); render();
+  });
+  const deskRem=document.querySelector('[data-action="desk-reminder"]');
+  if(deskRem) deskRem.addEventListener('click',()=>{
+    state.deskReminder=!state.deskReminder; saveProfile();
+    if(state.deskReminder) scheduleDeskReminder(); else clearDeskReminder();
+    render();
+  });
   document.querySelectorAll('[data-action="sleep"]').forEach(el=>{
     el.addEventListener('input',(e)=>{
       const idx=parseInt(el.dataset.day), v=parseFloat(e.target.value); getDay(idx).sleep=v;
@@ -2194,7 +2502,7 @@ if(location.search.indexOf('v=')!==-1){
 }
 
 const last=localStorage.getItem(STORE_PREFIX+'last');
-if(last && PROFILES[last]){ activeProfile=last; state=loadProfile(last); if(!state.unlockedBadges)state.unlockedBadges=[]; render(); }
+if(last && PROFILES[last]){ activeProfile=last; state=loadProfile(last); if(!state.unlockedBadges)state.unlockedBadges=[]; render(); if(state.deskReminder) scheduleDeskReminder(); }
 else { renderProfileSelect(); }
 
 // Vérifie les MAJ au démarrage, puis à chaque retour sur l'app (réveil d'écran, refocus)

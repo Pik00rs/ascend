@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ma routine peau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6efe4;
+    --paper: #fdfaf3;
+    --ink: #2b2520;
+    --ink-soft: #5a4f45;
+    --muted: #8a7d70;
+    --accent: #b94a2b;
+    --accent-dark: #8b3520;
+    --accent-soft: #e8d4c4;
+    --rule: #d9cbb8;
+    --warn-bg: #fff4e6;
+    --warn-border: #d49245;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(at 20% 10%, rgba(185, 74, 43, 0.06) 0px, transparent 50%),
+      radial-gradient(at 80% 90%, rgba(139, 53, 32, 0.05) 0px, transparent 50%);
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    min-height: 100vh;
+    padding: 24px 16px 80px;
+  }
+
+  .page {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 32px 8px 24px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(2.4rem, 9vw, 3.4rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    font-variation-settings: 'opsz' 144;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+
+  /* PROGRESS */
+  .progress {
+    margin: 24px auto 0;
+    max-width: 280px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--rule);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* SECTIONS */
+  section {
+    margin-bottom: 40px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .section-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .section-title-block { flex: 1; min-width: 0; }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  .section-meta {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* STEP CARD */
+  .step {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+
+  .step:hover { border-color: var(--accent-soft); }
+
+  .step.done {
+    background: var(--accent-soft);
+    border-color: var(--accent-soft);
+  }
+
+  .step.done .step-product,
+  .step.done .step-detail {
+    text-decoration: line-through;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 1px;
+    opacity: 0.6;
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink-soft);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    background: transparent;
+    transition: all 0.2s ease;
+  }
+
+  .step.done .checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkbox svg {
+    width: 12px;
+    height: 12px;
+    stroke: var(--paper);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .step.done .checkbox svg { opacity: 1; }
+
+  .step-body { flex: 1; min-width: 0; }
+
+  .step-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+
+  .step-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .step-product {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .step-role {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .step-detail {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  .step-detail .label {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 2px;
+  }
+
+  /* INFO BLOCK */
+  .info {
+    background: var(--paper);
+    border-left: 3px solid var(--accent);
+    padding: 16px 18px;
+    border-radius: 0 6px 6px 0;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  .info-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 15px;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .warn {
+    background: var(--warn-bg);
+    border-left-color: var(--warn-border);
+  }
+
+  /* DIVIDER */
+  .divider {
+    text-align: center;
+    margin: 48px 0 32px;
+    color: var(--accent);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    position: relative;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 40px);
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+
+  /* HABITS GRID */
+  .habits {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 24px 20px;
+  }
+
+  .habits-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 20px;
+    margin-bottom: 18px;
+    color: var(--accent-dark);
+  }
+
+  .habit {
+    display: flex;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--rule);
+    align-items: baseline;
+  }
+
+  .habit:last-child { border-bottom: none; }
+
+  .habit-key {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 14px;
+    min-width: 140px;
+    color: var(--ink);
+  }
+
+  .habit-val {
+    font-size: 14px;
+    color: var(--ink-soft);
+    flex: 1;
+  }
+
+  /* TIPS */
+  .tips {
+    list-style: none;
+  }
+
+  .tips li {
+    padding: 12px 0 12px 22px;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 14px;
+    color: var(--ink-soft);
+    position: relative;
+    line-height: 1.55;
+  }
+
+  .tips li:last-child { border-bottom: none; }
+
+  .tips li::before {
+    content: '✦';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  /* RESET BUTTON */
+  .reset-btn {
+    display: block;
+    margin: 32px auto 0;
+    background: transparent;
+    border: 1px solid var(--ink-soft);
+    color: var(--ink-soft);
+    padding: 10px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+  }
+
+  .reset-btn:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  footer .quote {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Soin · Visage · Quotidien</div>
+    <h1>Ma routine <em>peau</em></h1>
+    <div class="subtitle">Apaiser, protéger, réparer.</div>
+    <div class="progress">
+      <span id="progressText">0 / 0</span>
+      <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
+    </div>
+  </header>
+
+  <!-- MATIN -->
+  <section>
+    <div class="section-head">
+      <div class="section-num">I.</div>
+      <div class="section-title-block">
+        <div class="section-title">Matin</div>
+        <div class="section-meta">Réveiller · Hydrater · Protéger</div>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="info-title">Pourquoi pas de nettoyant ?</div>
+      Ta peau a déjà été nettoyée hier soir. Un nouveau nettoyage le matin abîmerait la barrière cutanée, déjà fragile. <strong>Eau tiède uniquement</strong> — sauf après une forte transpiration nocturne, auquel cas un passage très léger de Tolérance est ok.
+    </div>
+
+    <div class="step" data-id="m1">
+      <div class="checkbox"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"></polyline></svg></div>
+      <div class="step-body">
+        <div class="step-header"><span class="step-num">01</span><span class="step-product">Rinçage à l'eau tiède</span></div>
+        <div class="step-role">Réveil de la peau</div>
+        <div class="step-detail">
+          Mouille ton visage avec de l'eau <strong>tiède</strong> — jamais chaude (la chaleur dilate les vaisseaux et relance les rougeurs).
+          <span class="label">Comment</span>
+          Quelques éclaboussures pendant 10-15 secondes, puis tamponne (ne frotte pas) avec une serviette propre.
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-id="m2">
+      <div class="checkbox"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"></polyline></svg></div>
+      <div class="step-body">
+        <div class="step-header"><span class="step-num">02</span><span class="step-product">Ruboril Expert M</span></div>
+        <div class="step-role">Anti-rougeurs · Ciblé</div>
+        <div class="step-detail">
+          Sur les zones rouges du front (et entre les sourcils, ailes du nez si concernées).
+          <span class="label">Dosage</span>
+          Taille d'un petit pois pour tout le front.
+          <span class="label">Comment</span>
+          Dépose 2-3 petits points sur les zones rouges, étale en cercles doux du bout des doigts. Laisse pénétrer ~30 secondes.
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-id="m3">
+      <div class="checkbox"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"></polyline></svg></div>
+      <div class="step-body">
+        <div class="step-header"><span class="step-num">03</span><span class="step-product">Avène Hydrance</span></div>
+        <div class="step-role">Hydratation du jour</div>
+        <div class="step-detail">
+          Sur tout le visage (cou inclus si tu veux).
+          <span class="label">Dosage</span>
+          1 noisette (taille d'une pièce de 10 centimes).
+          <span class="label">Comment</span>
+          Chauffe entre les paumes, applique en lissant du centre vers l'extérieur. Tapote les zones sensibles plutôt que de frotter.
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-id="m4">
+      <div class="checkbox"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"></polyline></svg></div>
+      <div class="step-body">
+        <div class="step-header"><span class="step-num">04</span><span class="step-product">SPF 50</span></div>
+        <div class="step-role">Protection solaire · Indispensable</div>
+        <div class="step-detail">
+          ⚠️ <strong>À vérifier :</strong> si ton Hydrance est la version <em>UV SPF 30</em>, elle remplit cette étape. Sinon, il te faut un SPF séparé (idéalement SPF 50 à Macao).
+          <span class="label">Dosage</span>
+          2 phalanges de produit pour tout le visage. La majorité des gens en mettent 3 fois moins que nécessaire.
+          <span class="label">Comment</span>
+          Dernière couche, toujours. Étale uniformément, sans oublier les oreilles, le cou, la naissance des cheveux. À réappliquer si forte exposition (plage, terrasse).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">· · ·</div>
+
+  <!-- SOIR -->
+  <section>
+    <div class="section-head">
+      <div class="section-num">II.</div>
+      <div class="section-title-block">
+        <div class="section-title">Soir</div>
+        <div class="section-meta">Nettoyer · Réparer · Restaurer</div>
+      </div>
+    </div>
+
+    <div class="step" data-id="s1">
+      <div class="checkbox"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"></polyline></svg></div>
+      <div class="step-body">
+        <div class="step-header"><span class="step-num">01</span><span class="step-product">Tolérance Lotion nettoyante gélifiée</span></div>
+        <div class="step-role">Nettoyage doux</div>
+        <div class="step-detail">
+          Pour retirer la pollution, le sébum et les traces de SPF de la journée.
+          <span class="label">Dosage</span>
+          Une bonne noisette (taille d'une pièce de 1 euro).
+          <span class="label">Comment</span>
+          Sur peau humide à l'eau tiède. Masse en cercles doux 20-30 secondes — pas plus, et <strong>sans frotter le front</strong> si zone enflammée. Rince abondamment, tamponne pour sécher.
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-id="s2">
+      <div class="checkbox"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"></polyline></svg></div>
+      <div class="step-body">
+        <div class="step-header"><span class="step-num">02</span><span class="step-product">Ruboril Expert M</span></div>
+        <div class="step-role">Anti-rougeurs · Optionnel le soir</div>
+        <div class="step-detail">
+          Si les rougeurs sont fortes, refais une couche. Si elles sont calmes, tu peux sauter cette étape le soir pour ne pas surcharger la peau.
+          <span class="label">Dosage</span>
+          Petit pois sur les zones rouges.
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-id="s3">
+      <div class="checkbox"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"></polyline></svg></div>
+      <div class="step-body">
+        <div class="step-header"><span class="step-num">03</span><span class="step-product">Avène Cicalfate+</span></div>
+        <div class="step-role">Réparation · Ciblé</div>
+        <div class="step-detail">
+          Uniquement sur les <strong>cicatrices d'acné, zones irritées, micro-coupures, rasage</strong>. Pas sur tout le visage.
+          <span class="label">Dosage</span>
+          Goutte de la taille d'un grain de riz par cicatrice.
+          <span class="label">Comment</span>
+          Tapote en couche fine, laisse pénétrer 1 minute avant l'étape suivante. La nuit, ça travaille pour réparer la barrière cutanée.
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-id="s4">
+      <div class="checkbox"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"></polyline></svg></div>
+      <div class="step-body">
+        <div class="step-header"><span class="step-num">04</span><span class="step-product">Tolérance Hydra-10</span></div>
+        <div class="step-role">Hydratation barrière du soir</div>
+        <div class="step-detail">
+          Sur tout le visage, par-dessus le Cicalfate+ déjà appliqué en ciblé.
+          <span class="label">Dosage</span>
+          1 noisette.
+          <span class="label">Alternative</span>
+          Si ta peau tire vraiment, est sèche ou irritée → remplace par le <strong>Kiehl's Ultra Facial Advanced Repair Barrier Cream</strong> (plus riche, plus réparateur).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">· · ·</div>
+
+  <!-- SOS / PONCTUEL -->
+  <section>
+    <div class="section-head">
+      <div class="section-num">III.</div>
+      <div class="section-title-block">
+        <div class="section-title">Ponctuel</div>
+        <div class="section-meta">Au cas par cas · Pas tous les jours</div>
+      </div>
+    </div>
+
+    <div class="info warn">
+      <div class="info-title">⚠️ Fusidate / Foban — Antibiotique</div>
+      Ces deux tubes contiennent le même principe actif (acide fusidique). C'est un <strong>antibiotique</strong>, pas un soin quotidien. À utiliser <strong>uniquement</strong> sur un bouton clairement infecté (rouge, gonflé, avec pus), en <strong>cure courte de 5 à 7 jours maximum</strong>, idéalement validé par un médecin. Un usage prolongé crée des résistances bactériennes.
+      <br><br>
+      <strong>Dosage :</strong> goutte minuscule (tête d'épingle) directement sur le bouton, 2 fois par jour, jamais plus de 7 jours.
+    </div>
+
+    <div class="info warn">
+      <div class="info-title">⚠️ DiabeDerm (urée 20%)</div>
+      <strong>Ne pas mettre sur le visage.</strong> C'est un kératolytique concentré pour les zones de peau très épaisse (talons, coudes). Sur peau faciale sensible/enflammée, ça brûle et aggrave.
+    </div>
+
+    <div class="info">
+      <div class="info-title">À chercher encore — Antifongique</div>
+      Si dermatite séborrhéique confirmée, le vrai traitement de cause c'est un <strong>antifongique au kétoconazole</strong> (Nizoral / 採樂 en chinois). 1 à 2 fois par semaine en masque court sur le visage (3-5 minutes, puis rinçage). À demander en pharmacie en précisant la marque.
+    </div>
+  </section>
+
+  <div class="divider">· · ·</div>
+
+  <!-- LINGE -->
+  <section>
+    <div class="section-head">
+      <div class="section-num">IV.</div>
+      <div class="section-title-block">
+        <div class="section-title">Linge & habitudes</div>
+        <div class="section-meta">L'invisible qui compte</div>
+      </div>
+    </div>
+
+    <div class="habits">
+      <div class="habits-title">Linge de lit</div>
+      <div class="habit">
+        <div class="habit-key">Taie d'oreiller</div>
+        <div class="habit-val">Changer tous les <strong>2-3 jours</strong>. Ton front passe la nuit dessus → bactéries, sébum, restes de produits s'y accumulent.</div>
+      </div>
+      <div class="habit">
+        <div class="habit-key">Draps</div>
+        <div class="habit-val"><strong>1 fois par semaine</strong>.</div>
+      </div>
+      <div class="habit">
+        <div class="habit-key">Serviette visage</div>
+        <div class="habit-val">Idéalement une <strong>dédiée au visage</strong>, changée tous les 2-3 jours.</div>
+      </div>
+      <div class="habit">
+        <div class="habit-key">Lessive</div>
+        <div class="habit-val"><strong>Sans parfum</strong> / hypoallergénique (Persil sensitive, Le Chat sensitive, ou équivalent local).</div>
+      </div>
+    </div>
+
+    <div class="habits" style="margin-top: 20px;">
+      <div class="habits-title">Les gestes qui changent tout</div>
+      <ul class="tips">
+        <li><strong>Eau tiède, jamais chaude.</strong> La chaleur dilate les vaisseaux et relance les rougeurs.</li>
+        <li><strong>Tamponne, ne frotte pas</strong> quand tu sèches ton visage.</li>
+        <li><strong>Ne touche pas, ne gratte pas</strong> les zones qui pèlent ou démangent. Tes mains transportent des bactéries.</li>
+        <li><strong>Attends ~30 secondes à 1 minute</strong> entre chaque produit pour qu'il pénètre.</li>
+        <li>Évite les <strong>plats très épicés, l'alcool fort, les boissons brûlantes</strong> en période de poussée — déclencheurs classiques de rosacée.</li>
+        <li><strong>Sommeil et stress</strong> = ennemis n°1 de la dermatite séborrhéique. Continue ta cure de vitamine D, elle aide aussi pour ça.</li>
+        <li><strong>Patience.</strong> Compte 6 à 8 semaines avant de juger les résultats. La peau ne se calme pas en 3 jours.</li>
+      </ul>
+    </div>
+  </section>
+
+  <button class="reset-btn" onclick="resetAll()">Réinitialiser la journée</button>
+
+  <footer>
+    <div class="quote">« On ne soigne pas une peau, on l'écoute. »</div>
+    Si les rougeurs persistent au-delà de 6 semaines avec cette routine,<br>
+    <strong>un dermatologue</strong> reste le meilleur investissement.
+  </footer>
+
+</div>
+
+<script>
+  // Daily reset logic
+  const today = new Date().toDateString();
+  const stored = localStorage.getItem('routinePeauDate');
+
+  if (stored !== today) {
+    // New day → wipe checkboxes
+    document.querySelectorAll('.step').forEach(s => {
+      localStorage.removeItem('step_' + s.dataset.id);
+    });
+    localStorage.setItem('routinePeauDate', today);
+  }
+
+  // Restore + bind
+  const steps = document.querySelectorAll('.step');
+  steps.forEach(step => {
+    const id = step.dataset.id;
+    if (localStorage.getItem('step_' + id) === '1') {
+      step.classList.add('done');
+    }
+    step.addEventListener('click', () => {
+      step.classList.toggle('done');
+      localStorage.setItem('step_' + id, step.classList.contains('done') ? '1' : '0');
+      updateProgress();
+    });
+  });
+
+  function updateProgress() {
+    const total = steps.length;
+    const done = document.querySelectorAll('.step.done').length;
+    document.getElementById('progressText').textContent = done + ' / ' + total + ' aujourd\'hui';
+    document.getElementById('progressFill').style.width = (done / total * 100) + '%';
+  }
+
+  function resetAll() {
+    steps.forEach(s => {
+      s.classList.remove('done');
+      localStorage.setItem('step_' + s.dataset.id, '0');
+    });
+    updateProgress();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
