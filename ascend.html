@@ -522,7 +522,7 @@ input:focus { outline:none; }
 // >>> NUMÉRO DE VERSION <<<
 // À INCRÉMENTER À CHAQUE FOIS QUE TU DÉPLOIES UNE NOUVELLE VERSION SUR GITHUB.
 // L'app compare ce numéro à celui de version.json et propose la mise à jour.
-const APP_VERSION = 15;
+const APP_VERSION = 16;
 
 const TOTAL_DAYS = 42;
 const STORE_PREFIX = 'ascend_v1_';
@@ -549,37 +549,37 @@ const TRAIN_WEEKDAYS = [1, 4, 6]; // lun, jeu, sam (ordre chronologique dans la 
 // ===== PROFIL PRISE DE MASSE (toi) =====
 const SESSIONS_GAIN = [
   {
-    name: 'PUSH', sub: 'Pecs · Épaules · Triceps', xp: 100,
+    name: 'PECS / ÉPAULES', sub: 'Poussée haut du corps', xp: 100,
     exercises: [
-      { name: 'Développé couché haltères', sets:4, reps:'8 reps', machine:false, weighted:true, compound:true, rest:120, vid:'développé couché haltères technique débutant', viz:'bench', xp:22, tip:'EXO ROI du torse. Lourd et contrôlé. Descends jusqu\'à frôler la poitrine.' },
-      { name: 'Développé incliné haltères', sets:3, reps:'10 reps', machine:false, weighted:true, compound:true, rest:120, vid:'développé incliné haltères pectoraux haut', viz:'bench', xp:18, tip:'Cible le haut des pecs. Banc à ~30°.' },
-      { name: 'Développé militaire', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'développé militaire haltères épaules technique', viz:'press', xp:18, tip:'Construit les épaules larges. Pousse au-dessus de la tête.' },
+      { name: 'Dips', sets:4, reps:'8-10 reps', machine:false, weighted:false, compound:true, rest:120, vid:'dips barres parallèles technique', viz:'press', xp:22, tip:'EXO DE BASE pecs/triceps. Buste penché en avant pour cibler les pecs. Descends contrôlé.' },
+      { name: 'Développé couché', sets:4, reps:'8 reps', machine:false, weighted:true, compound:true, rest:120, vid:'développé couché barre technique', viz:'bench', xp:22, tip:'EXO ROI du torse. Descends jusqu\'à frôler la poitrine, pousse fort.' },
+      { name: 'Câble pecs (écarté poulie)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'écarté poulie vis-à-vis pectoraux', viz:'fly', xp:14, tip:'Isolation pecs. Étire bien en ouverture, serre en fin de mouvement.' },
+      { name: 'Machine pecs (pec deck)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'pec deck machine écarté pectoraux', viz:'fly', xp:13, tip:'Finition pecs, mouvement guidé propre.' },
       { name: 'Élévations latérales', sets:4, reps:'12-15 reps', machine:false, weighted:true, rest:75, vid:'élévations latérales haltères épaules technique', viz:'lateral', xp:14, tip:'Isolation épaules. Léger et strict = largeur d\'épaules.' },
-      { name: 'Extension triceps poulie', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'extension triceps poulie haute corde', viz:'triceps', xp:14, tip:'Coudes collés au corps.' },
-      { name: 'Cardio doux fin de séance', dur:'8 min', intensity:'Vélo ou tapis · allure facile, récup', cardioStep:true, machine:true, vid:'vélo elliptique récupération salle', viz:'bike', xp:14, tip:'Active la récup, démarre l\'aspect cardio sans cramer le sysème nerveux.' }
+      { name: 'Machine épaules (développé)', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:90, vid:'développé épaules machine technique', viz:'press', xp:16, tip:'Pousse au-dessus de la tête, mouvement guidé sécurisant.' }
     ]
   },
   {
-    name: 'PULL', sub: 'Dos · Biceps', xp: 100,
+    name: 'DOS / BRAS', sub: 'Tirage + biceps/triceps', xp: 100,
     exercises: [
-      { name: 'Tirage vertical (lat pulldown)', sets:4, reps:'8 reps', machine:true, weighted:true, compound:true, rest:120, vid:'tirage vertical poulie haute technique', viz:'pull', xp:22, tip:'EXO ROI du dos. Tire vers le haut du torse, dos en V.' },
-      { name: 'Rowing assis poulie', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'rowing assis poulie basse technique dos', viz:'row', xp:20, tip:'Serre les omoplates en fin de tirage. Dos large et épais.' },
-      { name: 'Tirage horizontal machine', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:90, vid:'tirage horizontal machine dos technique', viz:'row', xp:16, tip:'Variante pour le milieu du dos. Coudes près du corps.' },
-      { name: 'Curl biceps haltères', sets:3, reps:'10 reps', machine:false, weighted:true, rest:75, vid:'curl biceps haltères technique', viz:'curl', xp:14, tip:'Isolation. Pas d\'élan, mouvement propre.' },
-      { name: 'Curl marteau', sets:3, reps:'12 reps', machine:false, weighted:true, rest:75, vid:'curl marteau haltères biceps avant bras', viz:'curl', xp:14, tip:'Travaille le brachial + avant-bras.' },
-      { name: 'Cardio doux fin de séance', dur:'8 min', intensity:'Vélo ou steppeur · rythme modéré', cardioStep:true, machine:true, vid:'steppeur salle de sport rythme modéré', viz:'walk', xp:14, tip:'Aide la circulation post-séance dos.' }
+      { name: 'Tractions', sets:4, reps:'max reps', machine:false, weighted:false, compound:true, rest:120, vid:'traction pronation technique débutant', viz:'pullup', xp:24, tip:'EXO ROI du dos. Si trop dur : assistance élastique ou machine. Fais ton max propre.' },
+      { name: 'Tirage vertical (lat pulldown)', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'tirage vertical poulie haute technique', viz:'pull', xp:20, tip:'Complète les tractions. Tire vers le haut du torse, dos en V.' },
+      { name: 'Tirage horizontal', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:90, vid:'rowing assis poulie basse technique dos', viz:'row', xp:18, tip:'Épaisseur du dos. Serre les omoplates en fin de tirage.' },
+      { name: 'Lombaires (extensions)', sets:3, reps:'12-15 reps', machine:true, weighted:false, rest:75, vid:'extension lombaire banc hyperextension', viz:'lombaires', xp:12, tip:'Renforce le bas du dos. Mouvement lent, pas d\'à-coups.' },
+      { name: 'Câble triceps', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'extension triceps poulie haute corde', viz:'triceps', xp:13, tip:'Coudes collés au corps, étends complètement.' },
+      { name: 'Câble biceps', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'curl biceps poulie basse technique', viz:'curl', xp:13, tip:'Isolation biceps. Pas d\'élan, mouvement propre.' }
     ]
   },
   {
-    name: 'LEGS', sub: 'Quadris · Fessiers · Ischios · Mollets', xp: 110,
+    name: 'JAMBES', sub: 'Quadris · Fessiers · Ischios · Mollets', xp: 110,
     exercises: [
       { name: 'Presse à cuisses', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'presse à cuisses machine technique', viz:'press_legs', xp:24, tip:'EXO ROI des jambes. Amplitude complète, pousse avec les talons.' },
       { name: 'Fentes haltères', sets:3, reps:'10 reps / jambe', machine:false, weighted:true, compound:true, rest:120, vid:'fentes avant haltères technique', viz:'lunge', xp:20, tip:'Genou avant aligné avec la cheville. Quadris + fessiers.' },
       { name: 'Leg extension (quadris)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'leg extension machine quadriceps technique', viz:'squat', xp:14, tip:'Isolation avant de cuisse. Contrôle.' },
       { name: 'Leg curl (ischios)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'leg curl allongé machine ischio jambiers', viz:'squat', xp:14, tip:'Isolation arrière de cuisse. Indispensable pour équilibrer.' },
       { name: 'Mollets debout', sets:4, reps:'15 reps', machine:true, weighted:true, rest:75, vid:'extension mollets debout machine', viz:'calf', xp:12, tip:'Monte sur la pointe, pause 1s en haut.' },
-      { name: 'Gainage planche', sets:3, reps:'45 sec', machine:false, weighted:false, rest:60, vid:'gainage planche position correcte', viz:'plank', xp:12, tip:'Corps gainé, pas de creux dans le bas du dos.' },
-      { name: 'Cardio fin de séance', dur:'10 min', intensity:'Vélo facile · jambes lourdes, vas-y doux', cardioStep:true, machine:true, vid:'vélo récupération jambes lourdes', viz:'bike', xp:14, tip:'Décongestionne les jambes après le travail lourd.' }
+      { name: 'Face pull', sets:3, reps:'15 reps', machine:true, weighted:true, rest:60, vid:'face pull corde poulie arrière épaule', viz:'facepull', xp:14, tip:'Arrière d\'épaule + posture. Tire la corde vers le visage, coudes hauts. Léger et propre.' },
+      { name: 'Gainage planche', sets:3, reps:'45 sec', machine:false, weighted:false, rest:60, vid:'gainage planche position correcte', viz:'plank', xp:12, tip:'Corps gainé, pas de creux dans le bas du dos.' }
     ]
   }
 ];
@@ -962,6 +962,41 @@ function vizSVG(viz) {
           ${head(98,52)}
           <line x1="34" y1="76" x2="34" y2="100" ${B}/>
           <line x1="84" y1="60" x2="84" y2="100" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'pullup': // tractions — se hisse à la barre
+      return `<svg viewBox="0 0 120 120">
+        <line x1="20" y1="20" x2="100" y2="20" stroke="var(--magenta)" stroke-width="4" stroke-linecap="round"/>
+        <g class="viz-pull-arm" style="transform-origin:60px 40px;">
+          ${head(60,46)}
+          <line x1="60" y1="53" x2="60" y2="84" ${B}/>
+          <line x1="60" y1="53" x2="48" y2="22" ${A}/><line x1="60" y1="53" x2="72" y2="22" ${A}/>
+          <line x1="60" y1="84" x2="54" y2="100" ${B}/><line x1="60" y1="84" x2="66" y2="100" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'lombaires': // extension lombaire (hyperextension / banc)
+      return `<svg viewBox="0 0 120 120">
+        ${floor(106)}
+        <rect x="30" y="70" width="20" height="8" fill="var(--bg-3)" stroke="var(--border-bright)" stroke-width="2"/>
+        <line x1="40" y1="78" x2="38" y2="104" ${B}/>
+        <g class="viz-backext" style="transform-origin:48px 70px;">
+          <line x1="48" y1="70" x2="84" y2="60" ${A}/>
+          ${head(90,56)}
+        </g>
+      </svg>`;
+
+    case 'facepull': // face pull — tire la corde vers le visage, coudes hauts
+      return `<svg viewBox="0 0 120 120">
+        ${floor(108)}
+        <line x1="92" y1="30" x2="92" y2="90" stroke="var(--border-bright)" stroke-width="3"/>
+        ${head(50,44)}
+        <line x1="50" y1="51" x2="50" y2="82" ${B}/>
+        <line x1="50" y1="82" x2="44" y2="104" ${B}/><line x1="50" y1="82" x2="56" y2="104" ${B}/>
+        <g class="viz-row-arm">
+          <line x1="50" y1="56" x2="66" y2="48" ${A}/><line x1="66" y1="48" x2="78" y2="52" ${A}/>
+          <line x1="50" y1="56" x2="66" y2="64" ${A}/><line x1="66" y1="64" x2="78" y2="52" ${A}/>
         </g>
       </svg>`;
 
