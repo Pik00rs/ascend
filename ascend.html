@@ -79,6 +79,24 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .profile-card-stats { display:flex; gap:16px; font-size:10px; color:var(--ink-dim); letter-spacing:0.1em; }
 .profile-card-stats .lvl { color:var(--gold); }
 .profile-card-desc { font-size:11px; color:var(--ink-dim); line-height:1.5; margin-top:8px; }
+.profile-card.custom { border-color:var(--magenta-dim); }
+.profile-card.custom:hover { border-color:var(--magenta); box-shadow:0 0 14px rgba(240,65,255,0.15); }
+.profile-card.custom .profile-avatar { border-color:var(--magenta); color:var(--magenta); text-shadow:0 0 8px rgba(240,65,255,0.4); }
+.profile-card.custom .profile-card-class { color:var(--magenta); }
+.profile-card-del { margin-left:auto; width:28px; height:28px; background:transparent; border:1px solid var(--border-bright); color:var(--ink-dim); font-size:13px; cursor:pointer; border-radius:4px; line-height:1; transition:all 0.15s; flex-shrink:0; }
+.profile-card-del:hover { border-color:var(--bad); color:var(--bad); }
+.profile-add-btn { width:100%; padding:18px; margin-top:8px; background:transparent; border:1.5px dashed var(--border-bright); color:var(--ink-dim); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; font-weight:700; cursor:pointer; transition:all 0.15s; border-radius:4px; }
+.profile-add-btn:hover { border-color:var(--magenta); color:var(--magenta); border-style:solid; box-shadow:0 0 10px rgba(240,65,255,0.1); }
+.profile-form { padding:18px; margin-top:8px; background:var(--bg-2); border:1px solid var(--magenta); border-radius:4px; animation:fade-in 0.2s; }
+.profile-form-title { font-family:'Orbitron',monospace; font-size:13px; font-weight:700; color:var(--magenta); letter-spacing:0.1em; margin-bottom:6px; }
+.profile-form-hint { font-size:10px; color:var(--ink-dim); line-height:1.5; margin-bottom:14px; }
+.profile-form-input { width:100%; padding:12px 14px; background:var(--bg); border:1px solid var(--border-bright); color:var(--ink); font-family:'JetBrains Mono',monospace; font-size:14px; border-radius:4px; box-sizing:border-box; margin-bottom:12px; }
+.profile-form-input:focus { outline:none; border-color:var(--magenta); box-shadow:0 0 8px rgba(240,65,255,0.2); }
+.profile-form-btns { display:grid; grid-template-columns:1fr 2fr; gap:8px; }
+.profile-form-btn { padding:12px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; font-weight:700; cursor:pointer; border-radius:4px; border:1px solid var(--border-bright); background:var(--bg); color:var(--ink-dim); transition:all 0.15s; }
+.profile-form-btn.cancel:hover { border-color:var(--bad); color:var(--bad); }
+.profile-form-btn.create { background:linear-gradient(135deg, var(--magenta-dim), var(--magenta)); color:var(--bg); border-color:var(--magenta); }
+.profile-form-btn:active { transform:scale(0.97); }
 .profile-new { padding:16px; border:1px dashed var(--border-bright); text-align:center; cursor:pointer; color:var(--ink-dim); font-size:11px; letter-spacing:0.15em; text-transform:uppercase; transition:all 0.15s; }
 .profile-new:hover { border-color:var(--cyan-dim); color:var(--cyan); }
 
@@ -270,6 +288,7 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 /* VALIDATE SESSION button */
 .validate-zone { margin:20px 0 8px; }
 .validate-btn { width:100%; padding:18px; background:linear-gradient(135deg, var(--accent-dim), var(--accent)); color:var(--bg); border:none; font-family:'Orbitron',monospace; font-size:14px; letter-spacing:0.12em; text-transform:uppercase; font-weight:900; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; box-shadow:0 0 16px var(--accent); }
+.validate-btn.partial { background:linear-gradient(135deg, #b87b00, var(--amber)); box-shadow:0 0 14px var(--amber); }
 .validate-btn:active { transform:scale(0.98); }
 .validate-btn:disabled { background:var(--bg-2); color:var(--ink-faint); border:1px solid var(--border); box-shadow:none; cursor:not-allowed; }
 .validate-btn .vb-sub { display:block; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:400; letter-spacing:0.15em; margin-top:4px; opacity:0.8; }
@@ -522,7 +541,7 @@ input:focus { outline:none; }
 // >>> NUMÉRO DE VERSION <<<
 // À INCRÉMENTER À CHAQUE FOIS QUE TU DÉPLOIES UNE NOUVELLE VERSION SUR GITHUB.
 // L'app compare ce numéro à celui de version.json et propose la mise à jour.
-const APP_VERSION = 16;
+const APP_VERSION = 17;
 
 const TOTAL_DAYS = 42;
 const STORE_PREFIX = 'ascend_v1_';
@@ -774,7 +793,41 @@ function weekdayForDay(idx){ return dateForDay(idx).getDay(); }
 // Type de jour selon le jour de la semaine réel
 function dayTypeForDay(idx){ return DAY_TYPE_BY_WEEKDAY[weekdayForDay(idx)]; }
 
-function getProfile() { return PROFILES[activeProfile]; }
+function getProfile() { return getAllProfiles()[activeProfile]; }
+
+// Profils custom (créés depuis l'accueil). Ils héritent du programme prise de masse.
+function getCustomProfiles(){
+  try { return JSON.parse(localStorage.getItem(STORE_PREFIX+'custom')||'[]'); }
+  catch(e){ return []; }
+}
+function saveCustomProfiles(list){ localStorage.setItem(STORE_PREFIX+'custom', JSON.stringify(list)); }
+function makeCustomProfile(cp){
+  // Construit un profil complet à partir du modèle "gain"
+  const base = PROFILES.gain;
+  return {
+    id: cp.id,
+    initials: cp.initials,
+    name: cp.name,
+    className: 'CONSTRUCTEUR',
+    desc: 'Programme prise de masse · partagé',
+    bodyClass: 'profile-gain',
+    sessions: SESSIONS_GAIN,
+    phases: PHASES_GAIN,
+    weeklyGoal: 3,
+    intel: base.intel,
+    custom: true
+  };
+}
+function getAllProfiles(){
+  const all = Object.assign({}, PROFILES);
+  getCustomProfiles().forEach(cp=>{ all[cp.id] = makeCustomProfile(cp); });
+  return all;
+}
+function deleteCustomProfile(pid){
+  const list = getCustomProfiles().filter(p=>p.id!==pid);
+  saveCustomProfiles(list);
+  localStorage.removeItem(STORE_PREFIX+pid); // efface aussi la progression
+}
 
 // === VISUELS D'EXERCICE ===
 // Schéma SVG simple selon la catégorie de mouvement (hors-ligne, toujours dispo).
@@ -1438,12 +1491,13 @@ function validateSession(idx) {
   const d=getDay(idx);
   const sess=sessionForCard(idx);
   if(!sess || d.validated) return;
-  // Compte les exos finis via exDone (séries cochées), comme renderTrainDay
+  // Compte les exos finis pour ajuster le bonus XP proportionnellement
   let done=0;
   sess.exercises.forEach((ex,i)=>{ if(exDone(d,ex,i)) done++; });
-  if(done<sess.exercises.length) return; // sécurité
+  const ratio = sess.exercises.length>0 ? done/sess.exercises.length : 0;
+  const xpGain = Math.max(10, Math.round(sess.xp * ratio));
   d.validated=true;
-  if(idx<900) awardXP(sess.xp, 'SÉANCE '+sess.name);
+  if(idx<900) awardXP(xpGain, 'SÉANCE '+sess.name+(done<sess.exercises.length?' (partielle)':''));
   if(navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
   saveProfile();
   render();
@@ -1473,9 +1527,14 @@ function showToast(msg, type) {
 // ============================================================
 // RENDER : PROFILE SELECT
 // ============================================================
+// État local du formulaire de création
+let profileFormOpen = false;
+
 function renderProfileSelect() {
   document.body.className='';
   const app=document.getElementById('app');
+  const all=getAllProfiles();
+  const customIds = getCustomProfiles().map(c=>c.id);
   app.innerHTML=`
     <div class="profile-select">
       <div class="profile-logo">
@@ -1483,18 +1542,20 @@ function renderProfileSelect() {
         <div class="profile-logo-sub">Training Protocol · 6 Weeks</div>
       </div>
       <div class="profile-prompt">// Sélectionne ton profil</div>
-      ${Object.values(PROFILES).map(p=>{
+      ${Object.values(all).map(p=>{
         const data=loadProfile(p.id);
         const lv=levelFromXP(data.xp||0);
         const exists=profileExists(p.id);
+        const isCustom=customIds.includes(p.id);
         return `
-          <div class="profile-card ${p.id}" data-profile="${p.id}">
+          <div class="profile-card ${p.id} ${isCustom?'custom':''}" data-profile="${p.id}">
             <div class="profile-card-head">
               <div class="profile-avatar">${p.initials}</div>
               <div>
                 <div class="profile-card-name">${p.name}</div>
                 <div class="profile-card-class">${p.className}</div>
               </div>
+              ${isCustom?`<button class="profile-card-del" data-action="del-profile" data-pid="${p.id}" title="Supprimer">✕</button>`:''}
             </div>
             <div class="profile-card-stats">
               <span class="lvl">◆ NIVEAU ${lv.level}</span>
@@ -1504,17 +1565,73 @@ function renderProfileSelect() {
           </div>
         `;
       }).join('')}
+
+      ${profileFormOpen ? `
+        <div class="profile-form">
+          <div class="profile-form-title">// NOUVEAU PROFIL</div>
+          <div class="profile-form-hint">Mêmes séances que toi (prise de masse). Stocké uniquement sur cet appareil.</div>
+          <input type="text" id="new-profile-name" class="profile-form-input" placeholder="Prénom ou pseudo" maxlength="20" autocomplete="off" />
+          <div class="profile-form-btns">
+            <button class="profile-form-btn cancel" data-action="profile-form-cancel">Annuler</button>
+            <button class="profile-form-btn create" data-action="profile-form-create">Créer le profil</button>
+          </div>
+        </div>
+      ` : `
+        <button class="profile-add-btn" data-action="add-profile">＋ CRÉER UN NOUVEAU PROFIL</button>
+      `}
     </div>
   `;
   document.querySelectorAll('[data-profile]').forEach(el=>{
-    el.addEventListener('click',()=>{
+    el.addEventListener('click',(e)=>{
+      if(e.target.closest('[data-action="del-profile"]')) return;
       activeProfile=el.dataset.profile;
       state=loadProfile(activeProfile);
       if(!state.unlockedBadges) state.unlockedBadges=[];
       localStorage.setItem(STORE_PREFIX+'last', activeProfile);
       currentView='today';
+      profileFormOpen=false;
       render();
     });
+  });
+  // Suppression d'un profil custom
+  document.querySelectorAll('[data-action="del-profile"]').forEach(el=>{
+    el.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const pid=el.dataset.pid;
+      const prof=getAllProfiles()[pid];
+      if(confirm('Supprimer le profil "'+prof.name+'" et toute sa progression ? Action irréversible.')){
+        deleteCustomProfile(pid);
+        renderProfileSelect();
+      }
+    });
+  });
+  // Ouvrir le formulaire de création
+  const addBtn=document.querySelector('[data-action="add-profile"]');
+  if(addBtn) addBtn.addEventListener('click',()=>{ profileFormOpen=true; renderProfileSelect(); setTimeout(()=>{ const i=document.getElementById('new-profile-name'); if(i)i.focus(); },50); });
+  const cancelBtn=document.querySelector('[data-action="profile-form-cancel"]');
+  if(cancelBtn) cancelBtn.addEventListener('click',()=>{ profileFormOpen=false; renderProfileSelect(); });
+  const createBtn=document.querySelector('[data-action="profile-form-create"]');
+  if(createBtn) createBtn.addEventListener('click',()=>{
+    const input=document.getElementById('new-profile-name');
+    const raw=(input&&input.value||'').trim();
+    if(!raw){ if(input) input.focus(); return; }
+    // Génère un id unique et des initiales
+    const baseId = 'p_'+raw.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,12) || 'p_user';
+    let id = baseId, n=1;
+    const taken = getAllProfiles();
+    while(taken[id]) { id = baseId+'_'+(++n); }
+    const initials = raw.replace(/\s+/g,'').slice(0,2).toUpperCase() || 'P'+n;
+    const list = getCustomProfiles();
+    list.push({ id, name: raw.slice(0,20), initials });
+    saveCustomProfiles(list);
+    // Active directement le nouveau profil
+    activeProfile = id;
+    state = loadProfile(id);
+    if(!state.unlockedBadges) state.unlockedBadges=[];
+    localStorage.setItem(STORE_PREFIX+'last', id);
+    currentView='today';
+    profileFormOpen=false;
+    render();
   });
 }
 
@@ -1567,7 +1684,6 @@ function render() {
     <div class="view-content">${content}</div>
   `;
   attachListeners();
-  updateTimerDisplay();
 }
 
 function renderPreviewBar(){
@@ -1888,34 +2004,21 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
 
   html+=sess.exercises.map((ex,i)=>renderExerciseCard(ex,i,dd,idx)).join('');
 
-  // VALIDATION DE SÉANCE
+  // VALIDATION DE SÉANCE — toujours autorisée même si tous les exos ne sont pas finis
   const allDone = done>=total;
   html+=`<div class="validate-zone">`;
   if(dd.validated){
-    html+=`<div class="validate-done">✓ SÉANCE VALIDÉE<span class="vd-sub">+${sess.xp} XP bonus encaissés</span></div>`;
+    html+=`<div class="validate-done">✓ SÉANCE VALIDÉE<span class="vd-sub">${done}/${total} exos · bonus XP encaissé</span></div>`;
   } else if(allDone){
     html+=`<button class="validate-btn" data-action="validate" data-day="${idx}">VALIDER LA SÉANCE<span class="vb-sub">Encaisse +${sess.xp} XP de bonus</span></button>`;
+  } else if(done>0){
+    const ratio = done/total;
+    const xpGain = Math.max(10, Math.round(sess.xp * ratio));
+    html+=`<button class="validate-btn partial" data-action="validate" data-day="${idx}">VALIDER (PARTIELLE)<span class="vb-sub">${done}/${total} exos faits · +${xpGain} XP</span></button>`;
   } else {
-    html+=`<button class="validate-btn" disabled>VALIDER LA SÉANCE<span class="vb-sub">Termine les ${total} exercices d'abord · ${done}/${total} fait${done>1?'s':''}</span></button>`;
+    html+=`<button class="validate-btn" disabled>VALIDER LA SÉANCE<span class="vb-sub">Coche au moins un exo</span></button>`;
   }
   html+=`</div>`;
-
-  // Rest timer
-  const tState=timerState();
-  html+=`
-    <div class="section-label">Chrono repos</div>
-    <div class="rest-timer ${tState}" id="rest-timer">
-      <div class="rest-timer-label"><span>// REPOS ENTRE SÉRIES</span><span class="rest-timer-hint">se lance auto au cochage</span></div>
-      <div class="rest-timer-display" id="timer-display">${restTimer.running?formatTimer(restTimer.seconds):'00:00'}</div>
-      <div class="rest-progress"><div class="rest-progress-fill" id="rest-progress-fill" style="transform:scaleX(${restTimer.total>0&&restTimer.running?(restTimer.seconds/restTimer.total):0})"></div></div>
-      <div class="rest-timer-btns">
-        <button class="rest-timer-btn" data-timer="60">60s</button>
-        <button class="rest-timer-btn" data-timer="90">90s</button>
-        <button class="rest-timer-btn add" data-timer="add">+30s</button>
-        <button class="rest-timer-btn stop" data-timer="stop">STOP</button>
-      </div>
-    </div>
-  `;
 
   // Récup
   html+=`<div class="section-label">Récupération <span class="count">bonus XP</span></div>`;
@@ -2336,27 +2439,11 @@ function attachListeners() {
     const arr=getSets(d, exi, ex.sets);
     const was=arr[si].done;
     arr[si].done=!was;
-    if(sandbox){ saveProfile(); render(); return; } // test : pas d'XP, pas de chrono
+    if(sandbox){ saveProfile(); render(); return; } // test : pas d'XP
     const perSet=Math.max(1, Math.round(ex.xp/ex.sets));
     awardXP(was ? -perSet : perSet);
     if(was && d.validated){ d.validated=false; awardXP(-sess.xp,'Séance annulée'); }
-    // Lancement auto du chrono quand on COCHE une série (pas au décochage).
-    // On ne lance pas si c'est la toute dernière série du dernier exercice (séance finie).
-    let autoStart=0;
-    if(!was){
-      const restSec = ex.rest || 90;
-      const lastSetOfEx = (si === ex.sets-1);
-      const lastEx = (exi === sess.exercises.length-1);
-      if(!(lastSetOfEx && lastEx)) autoStart=restSec;
-    }
     saveProfile(); render();
-    if(autoStart>0){
-      startTimer(autoStart);
-      requestAnimationFrame(()=>{
-        const t=document.getElementById('rest-timer');
-        if(t) t.scrollIntoView({ behavior:'smooth', block:'center' });
-      });
-    }
   }));
   // Saisie reps par série
   document.querySelectorAll('[data-action="set-reps"]').forEach(el=>{
@@ -2459,16 +2546,6 @@ function attachListeners() {
     });
   });
   document.querySelectorAll('[data-toggle]').forEach(el=>el.addEventListener('click',()=>{ openSections[el.dataset.toggle]=!openSections[el.dataset.toggle]; render(); }));
-  document.querySelectorAll('[data-timer]').forEach(el=>el.addEventListener('click',()=>{
-    const v=el.dataset.timer;
-    if(v==='stop'){ stopTimer(); restTimer.seconds=0; restTimer.total=0; updateTimerDisplay(); }
-    else if(v==='add'){
-      // +30s : prolonge le chrono en cours, ou démarre un 30s si arrêté
-      if(restTimer.running){ restTimer.seconds+=30; restTimer.total+=30; updateTimerDisplay(); }
-      else startTimer(30);
-    }
-    else startTimer(parseInt(v));
-  }));
   const prev=document.querySelector('[data-action="prev-week"]'); if(prev)prev.addEventListener('click',()=>{state.viewWeek=Math.max(1,state.viewWeek-1);render();});
   const next=document.querySelector('[data-action="next-week"]'); if(next)next.addEventListener('click',()=>{state.viewWeek=Math.min(6,state.viewWeek+1);render();});
   const reset=document.querySelector('[data-action="reset"]'); if(reset)reset.addEventListener('click',()=>{
@@ -2537,7 +2614,8 @@ if(location.search.indexOf('v=')!==-1){
 }
 
 const last=localStorage.getItem(STORE_PREFIX+'last');
-if(last && PROFILES[last]){ activeProfile=last; state=loadProfile(last); if(!state.unlockedBadges)state.unlockedBadges=[]; render(); if(state.deskReminder) scheduleDeskReminder(); }
+const allP=getAllProfiles();
+if(last && allP[last]){ activeProfile=last; state=loadProfile(last); if(!state.unlockedBadges)state.unlockedBadges=[]; render(); if(state.deskReminder) scheduleDeskReminder(); }
 else { renderProfileSelect(); }
 
 // Vérifie les MAJ au démarrage, puis à chaque retour sur l'app (réveil d'écran, refocus)
