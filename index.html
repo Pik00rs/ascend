@@ -140,6 +140,14 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .banner-sub { font-size:11px; color:var(--ink-dim); }
 .banner-reward { position:absolute; top:14px; right:14px; font-size:10px; font-family:'Orbitron',monospace; font-weight:700; color:var(--gold); text-shadow:0 0 6px rgba(255,217,61,0.4); background:var(--bg); border:1px solid rgba(255,217,61,0.3); padding:4px 8px; }
 .banner-meta { position:absolute; bottom:14px; right:14px; font-size:9px; letter-spacing:0.12em; color:var(--ink-dim); text-transform:uppercase; }
+.session-timer { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; margin-bottom:14px; background:var(--bg-2); border:1px solid var(--accent-dim); border-radius:4px; }
+.session-timer.running { box-shadow:0 0 10px rgba(5,242,219,0.08); }
+.session-timer.done { border-color:var(--ok); background:rgba(0,255,156,0.04); }
+.session-timer-label { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.18em; color:var(--accent); font-weight:700; }
+.session-timer.done .session-timer-label { color:var(--ok); }
+.session-timer-value { font-family:'Orbitron',monospace; font-weight:900; font-size:20px; color:var(--ink); letter-spacing:0.05em; }
+.session-timer.running .session-timer-value { color:var(--accent); text-shadow:0 0 6px rgba(5,242,219,0.4); }
+.session-timer.done .session-timer-value { color:var(--ok); }
 
 /* QUESTS */
 .quest-strip { display:flex; gap:6px; margin-bottom:18px; }
@@ -193,6 +201,27 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .exo-tip { font-size:10px; color:var(--ink-faint); line-height:1.45; font-style:italic; padding:0 12px 12px 54px; margin-top:-4px; }
 .exo-prev { font-size:10px; padding:0 12px 10px 54px; letter-spacing:0.03em; color:var(--ink-faint); }
 .exo-prev .up { color:var(--ok); } .exo-prev .down { color:var(--amber); } .exo-prev .same { color:var(--ink-dim); }
+.exo-prog-btn { margin:10px 12px 12px; padding:9px 12px; display:flex; align-items:center; gap:8px; width:calc(100% - 24px); background:var(--bg-3); border:1px solid var(--border-bright); color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; font-weight:500; cursor:pointer; border-radius:4px; transition:all 0.15s; }
+.exo-prog-btn:hover { border-color:var(--accent); background:var(--bg-2); }
+.exo-prog-btn:active { transform:scale(0.98); }
+.exo-prog-btn span:first-child { font-size:14px; }
+/* Overlay progression */
+.prog-overlay-inner { width:100%; max-width:480px; max-height:90vh; overflow-y:auto; background:var(--bg-2); border:1px solid var(--accent-dim); border-radius:6px; padding:18px; box-shadow:0 0 28px rgba(5,242,219,0.2); }
+.prog-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.prog-title { font-family:'Orbitron',monospace; font-weight:700; font-size:17px; color:var(--ink); letter-spacing:0.04em; line-height:1.2; }
+.prog-sub { font-size:9px; letter-spacing:0.15em; color:var(--accent); margin-top:4px; font-weight:700; }
+.prog-close { width:32px; height:32px; flex-shrink:0; background:transparent; border:1px solid var(--border-bright); color:var(--ink-dim); font-size:14px; cursor:pointer; border-radius:4px; }
+.prog-close:hover { border-color:var(--bad); color:var(--bad); }
+.prog-chart-wrap { background:var(--bg-3); border:1px solid var(--border); border-radius:4px; padding:8px; margin-bottom:14px; }
+.prog-chart { width:100%; height:auto; display:block; }
+.prog-chart-empty { padding:30px 16px; text-align:center; font-size:11px; color:var(--ink-dim); line-height:1.6; }
+.prog-table-wrap { background:var(--bg-3); border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+.prog-table { width:100%; border-collapse:collapse; font-family:'JetBrains Mono',monospace; font-size:11px; }
+.prog-table th { padding:9px 10px; text-align:left; background:var(--bg); color:var(--ink-dim); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; font-size:9px; border-bottom:1px solid var(--border-bright); }
+.prog-table td { padding:9px 10px; border-bottom:1px solid var(--border); color:var(--ink); }
+.prog-table tr:last-child td { border-bottom:none; }
+.prog-table .prog-val { color:var(--accent); font-weight:700; }
+.prog-empty { color:var(--ink-dim); text-align:center; font-style:italic; padding:24px 12px !important; line-height:1.6; }
 
 /* EXERCISE VISUAL (illustration + boutons démo) */
 .exo-viz { padding:4px 12px 14px 12px; display:flex; gap:12px; align-items:stretch; }
@@ -541,7 +570,7 @@ input:focus { outline:none; }
 // >>> NUMÉRO DE VERSION <<<
 // À INCRÉMENTER À CHAQUE FOIS QUE TU DÉPLOIES UNE NOUVELLE VERSION SUR GITHUB.
 // L'app compare ce numéro à celui de version.json et propose la mise à jour.
-const APP_VERSION = 17;
+const APP_VERSION = 20;
 
 const TOTAL_DAYS = 42;
 const STORE_PREFIX = 'ascend_v1_';
@@ -570,21 +599,21 @@ const SESSIONS_GAIN = [
   {
     name: 'PECS / ÉPAULES', sub: 'Poussée haut du corps', xp: 100,
     exercises: [
-      { name: 'Dips', sets:4, reps:'8-10 reps', machine:false, weighted:false, compound:true, rest:120, vid:'dips barres parallèles technique', viz:'press', xp:22, tip:'EXO DE BASE pecs/triceps. Buste penché en avant pour cibler les pecs. Descends contrôlé.' },
-      { name: 'Développé couché', sets:4, reps:'8 reps', machine:false, weighted:true, compound:true, rest:120, vid:'développé couché barre technique', viz:'bench', xp:22, tip:'EXO ROI du torse. Descends jusqu\'à frôler la poitrine, pousse fort.' },
+      { name: 'Dips', sets:4, reps:'8-10 reps', machine:false, weighted:false, assisted:true, compound:true, rest:120, vid:'dips barres parallèles technique', viz:'press', xp:22, tip:'EXO DE BASE pecs/triceps. Si trop dur, utilise un élastique d\'assistance et note le nombre. Buste penché en avant pour cibler les pecs.' },
+      { name: 'Développé couché', sets:3, reps:'8 reps', machine:false, weighted:true, compound:true, rest:120, vid:'développé couché barre technique', viz:'bench', xp:22, tip:'EXO ROI du torse. Descends jusqu\'à frôler la poitrine, pousse fort.' },
       { name: 'Câble pecs (écarté poulie)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'écarté poulie vis-à-vis pectoraux', viz:'fly', xp:14, tip:'Isolation pecs. Étire bien en ouverture, serre en fin de mouvement.' },
       { name: 'Machine pecs (pec deck)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'pec deck machine écarté pectoraux', viz:'fly', xp:13, tip:'Finition pecs, mouvement guidé propre.' },
-      { name: 'Élévations latérales', sets:4, reps:'12-15 reps', machine:false, weighted:true, rest:75, vid:'élévations latérales haltères épaules technique', viz:'lateral', xp:14, tip:'Isolation épaules. Léger et strict = largeur d\'épaules.' },
+      { name: 'Élévations latérales', sets:3, reps:'12-15 reps', machine:false, weighted:true, rest:75, vid:'élévations latérales haltères épaules technique', viz:'lateral', xp:14, tip:'Isolation épaules. Léger et strict = largeur d\'épaules.' },
       { name: 'Machine épaules (développé)', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:90, vid:'développé épaules machine technique', viz:'press', xp:16, tip:'Pousse au-dessus de la tête, mouvement guidé sécurisant.' }
     ]
   },
   {
     name: 'DOS / BRAS', sub: 'Tirage + biceps/triceps', xp: 100,
     exercises: [
-      { name: 'Tractions', sets:4, reps:'max reps', machine:false, weighted:false, compound:true, rest:120, vid:'traction pronation technique débutant', viz:'pullup', xp:24, tip:'EXO ROI du dos. Si trop dur : assistance élastique ou machine. Fais ton max propre.' },
-      { name: 'Tirage vertical (lat pulldown)', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'tirage vertical poulie haute technique', viz:'pull', xp:20, tip:'Complète les tractions. Tire vers le haut du torse, dos en V.' },
+      { name: 'Tractions', sets:4, reps:'max reps', machine:false, weighted:false, assisted:true, compound:true, rest:120, vid:'traction pronation technique débutant', viz:'pullup', xp:24, tip:'EXO ROI du dos. Si trop dur, note le nombre d\'élastiques d\'assistance utilisés. Fais ton max propre.' },
+      { name: 'Tirage vertical (lat pulldown)', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'tirage vertical poulie haute technique', viz:'pull', xp:20, tip:'Complète les tractions. Tire vers le haut du torse, dos en V.' },
       { name: 'Tirage horizontal', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:90, vid:'rowing assis poulie basse technique dos', viz:'row', xp:18, tip:'Épaisseur du dos. Serre les omoplates en fin de tirage.' },
-      { name: 'Lombaires (extensions)', sets:3, reps:'12-15 reps', machine:true, weighted:false, rest:75, vid:'extension lombaire banc hyperextension', viz:'lombaires', xp:12, tip:'Renforce le bas du dos. Mouvement lent, pas d\'à-coups.' },
+      { name: 'Lombaires (extensions)', sets:3, reps:'12-15 reps', machine:true, weighted:true, rest:75, vid:'extension lombaire banc hyperextension', viz:'lombaires', xp:12, tip:'Renforce le bas du dos. Mouvement lent, pas d\'à-coups. Tu peux tenir une plaque contre le torse pour ajouter du poids.' },
       { name: 'Câble triceps', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'extension triceps poulie haute corde', viz:'triceps', xp:13, tip:'Coudes collés au corps, étends complètement.' },
       { name: 'Câble biceps', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'curl biceps poulie basse technique', viz:'curl', xp:13, tip:'Isolation biceps. Pas d\'élan, mouvement propre.' }
     ]
@@ -592,11 +621,11 @@ const SESSIONS_GAIN = [
   {
     name: 'JAMBES', sub: 'Quadris · Fessiers · Ischios · Mollets', xp: 110,
     exercises: [
-      { name: 'Presse à cuisses', sets:4, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'presse à cuisses machine technique', viz:'press_legs', xp:24, tip:'EXO ROI des jambes. Amplitude complète, pousse avec les talons.' },
+      { name: 'Presse à cuisses', sets:3, reps:'10 reps', machine:true, weighted:true, compound:true, rest:120, vid:'presse à cuisses machine technique', viz:'press_legs', xp:24, tip:'EXO ROI des jambes. Amplitude complète, pousse avec les talons.' },
       { name: 'Fentes haltères', sets:3, reps:'10 reps / jambe', machine:false, weighted:true, compound:true, rest:120, vid:'fentes avant haltères technique', viz:'lunge', xp:20, tip:'Genou avant aligné avec la cheville. Quadris + fessiers.' },
       { name: 'Leg extension (quadris)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'leg extension machine quadriceps technique', viz:'squat', xp:14, tip:'Isolation avant de cuisse. Contrôle.' },
       { name: 'Leg curl (ischios)', sets:3, reps:'12 reps', machine:true, weighted:true, rest:75, vid:'leg curl allongé machine ischio jambiers', viz:'squat', xp:14, tip:'Isolation arrière de cuisse. Indispensable pour équilibrer.' },
-      { name: 'Mollets debout', sets:4, reps:'15 reps', machine:true, weighted:true, rest:75, vid:'extension mollets debout machine', viz:'calf', xp:12, tip:'Monte sur la pointe, pause 1s en haut.' },
+      { name: 'Mollets debout', sets:3, reps:'15 reps', machine:true, weighted:true, rest:75, vid:'extension mollets debout machine', viz:'calf', xp:12, tip:'Monte sur la pointe, pause 1s en haut.' },
       { name: 'Face pull', sets:3, reps:'15 reps', machine:true, weighted:true, rest:60, vid:'face pull corde poulie arrière épaule', viz:'facepull', xp:14, tip:'Arrière d\'épaule + posture. Tire la corde vers le visage, coudes hauts. Léger et propre.' },
       { name: 'Gainage planche', sets:3, reps:'45 sec', machine:false, weighted:false, rest:60, vid:'gainage planche position correcte', viz:'plank', xp:12, tip:'Corps gainé, pas de creux dans le bas du dos.' }
     ]
@@ -666,6 +695,18 @@ const YOGA = [
   { name:'Posture de l\'enfant', target:'60 sec', viz:'yoga_child', secs:60, vid:'posture de l enfant yoga' },
   { name:'Torsion couchée', target:'60s / côté', viz:'yoga_twist', secs:60, perSide:true, vid:'torsion couchée yoga étirement' },
   { name:'Savasana', target:'3 min', viz:'yoga_savasana', secs:180, vid:'savasana relaxation yoga' }
+];
+
+// === EXOS ABDOS (sur les jours d'étirement : mar/ven/dim) ===
+// Routine courte ~8-10 min, du dynamique vers le statique, du superficiel vers le profond.
+// Chaque exo a un compteur de reps par série (à remplir selon ce qui a été fait).
+const ABDOS = [
+  { name:'Mountain climbers', sets:3, reps:'20 reps', viz:'abdo_climber', vid:'mountain climbers technique exercice abdos', xp:3, tip:'Échauffement dynamique. Genou vers la poitrine en alternance rapide. Garde le dos plat.' },
+  { name:'Crunchs', sets:3, reps:'15 reps', viz:'abdo_crunch', vid:'crunch abdominaux haut technique', xp:3, tip:'Haut des abdos. Décolle juste les omoplates du sol, ne tire pas sur la nuque.' },
+  { name:'Crunchs inversés', sets:3, reps:'12 reps', viz:'abdo_crunch_rev', vid:'crunch inversé bas abdominaux exercice', xp:4, tip:'Bas des abdos (la zone la plus dure). Décolle les hanches du sol, contrôle la descente.' },
+  { name:'Russian twists', sets:3, reps:'20 reps (10/côté)', viz:'abdo_twist', vid:'russian twist obliques abdos technique', xp:3, tip:'Obliques. Buste légèrement penché en arrière, pieds en l\'air ou au sol. Tu peux tenir un objet lesté pour rendre plus dur.' },
+  { name:'Planche latérale', sets:2, reps:'30s / côté', viz:'abdo_sideplank', vid:'planche latérale gainage technique', xp:4, tip:'Obliques profonds. Corps droit, hanches hautes, garde le gainage. 30s par côté.' },
+  { name:'Planche (gainage)', sets:3, reps:'40 sec', viz:'abdo_plank', vid:'gainage planche position correcte', xp:4, tip:'Finition isométrique. Corps gainé, pas de creux dans le bas du dos. Tiens le temps que tu peux.' }
 ];
 
 // === EXOS DESK (à faire assis pendant le grind poker) ===
@@ -741,7 +782,7 @@ let activeProfile = null;
 let state = null;
 let currentView = 'today';
 let previewDay = null; // mode test : index de jour à prévisualiser (null = aujourd'hui)
-let openSections = { stretches:false, yoga:false };
+let openSections = { stretches:false, abdos:false, yoga:false };
 let restTimer = { seconds:0, total:0, running:false, interval:null };
 let audioCtx=null;
 
@@ -1050,6 +1091,75 @@ function vizSVG(viz) {
         <g class="viz-row-arm">
           <line x1="50" y1="56" x2="66" y2="48" ${A}/><line x1="66" y1="48" x2="78" y2="52" ${A}/>
           <line x1="50" y1="56" x2="66" y2="64" ${A}/><line x1="66" y1="64" x2="78" y2="52" ${A}/>
+        </g>
+      </svg>`;
+
+    // === ABDOS ===
+    case 'abdo_crunch': // crunchs au sol — décolle les épaules
+      return `<svg viewBox="0 0 120 120">
+        ${floor(106)}
+        <line x1="40" y1="94" x2="80" y2="94" ${B}/>
+        <line x1="80" y1="94" x2="86" y2="80" ${B}/><line x1="86" y1="80" x2="86" y2="94" ${B}/>
+        <g class="viz-pushup" style="transform-origin:30px 88px;">
+          ${head(28,82)}<line x1="32" y1="86" x2="48" y2="92" ${A}/>
+        </g>
+      </svg>`;
+
+    case 'abdo_crunch_rev': // crunchs inversés — jambes en l'air, bassin monte
+      return `<svg viewBox="0 0 120 120">
+        ${floor(106)}
+        ${head(20,90)}
+        <line x1="24" y1="92" x2="62" y2="92" ${B}/>
+        <g class="viz-pushup" style="transform-origin:62px 92px;">
+          <line x1="62" y1="92" x2="78" y2="60" ${A}/>
+          <line x1="78" y1="60" x2="86" y2="40" ${A}/>
+        </g>
+      </svg>`;
+
+    case 'abdo_twist': // russian twist — assis, buste tourne
+      return `<svg viewBox="0 0 120 120">
+        ${floor(106)}
+        ${head(60,42)}
+        <g class="viz-twist-desk" style="transform-origin:60px 60px;">
+          <line x1="60" y1="49" x2="60" y2="78" ${B}/>
+          <line x1="60" y1="58" x2="40" y2="64" ${A}/>
+          <line x1="60" y1="58" x2="80" y2="64" ${A}/>
+        </g>
+        <line x1="60" y1="78" x2="84" y2="68" ${B}/>
+        <line x1="60" y1="78" x2="36" y2="68" ${B}/>
+      </svg>`;
+
+    case 'abdo_climber': // mountain climbers — planche + jambes qui pédalent
+      return `<svg viewBox="0 0 120 120">
+        ${floor(106)}
+        <line x1="26" y1="76" x2="94" y2="58" ${A}/>
+        ${head(98,54)}
+        <line x1="34" y1="74" x2="34" y2="100" ${B}/>
+        <g class="viz-walk-leg" style="transform-origin:84px 64px;">
+          <line x1="84" y1="64" x2="68" y2="90" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'abdo_sideplank': // planche latérale — corps droit appui un avant-bras
+      return `<svg viewBox="0 0 120 120">
+        ${floor(106)}
+        <g class="viz-breathe" style="transform-origin:60px 70px;">
+          <line x1="22" y1="98" x2="96" y2="44" ${A}/>
+          ${head(100,40)}
+          <line x1="22" y1="98" x2="22" y2="80" ${B}/>
+          <line x1="22" y1="80" x2="34" y2="80" ${B}/>
+        </g>
+      </svg>`;
+
+    case 'abdo_plank': // planche normale (variante)
+      return `<svg viewBox="0 0 120 120">
+        ${floor(106)}
+        <g class="viz-breathe">
+          <line x1="26" y1="80" x2="96" y2="62" ${A}/>
+          ${head(100,58)}
+          <line x1="30" y1="80" x2="28" y2="100" ${B}/>
+          <line x1="34" y1="80" x2="42" y2="100" ${B}/>
+          <line x1="88" y1="65" x2="88" y2="100" ${B}/>
         </g>
       </svg>`;
 
@@ -1401,12 +1511,42 @@ function sessionForCard(idx){
 
 function getDay(idx) {
   const k='d'+idx;
-  if(!state.days[k]) state.days[k]={ exercises:{}, sets:{}, cardioSteps:{}, stretches:{}, yoga:{}, sleep:0, validated:false };
+  if(!state.days[k]) state.days[k]={ exercises:{}, sets:{}, cardioSteps:{}, stretches:{}, yoga:{}, abdoSets:{}, sleep:0, validated:false };
   const d=state.days[k];
-  ['exercises','sets','cardioSteps','stretches','yoga'].forEach(f=>{ if(!d[f]) d[f]={}; });
+  ['exercises','sets','cardioSteps','stretches','yoga','abdoSets'].forEach(f=>{ if(!d[f]) d[f]={}; });
   if(d.sleep===undefined)d.sleep=0;
   if(d.validated===undefined)d.validated=false;
   return d;
+}
+
+// === TIMER DE SÉANCE ===
+// Durée formatée MM:SS ou HH:MM:SS si > 1h
+function formatSessionDuration(d){
+  if(!d || !d.sessionStart) return '00:00';
+  const end = d.sessionEnd || Date.now();
+  const sec = Math.max(0, Math.floor((end - d.sessionStart)/1000));
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  const s = sec%60;
+  const pad=(n)=>String(n).padStart(2,'0');
+  return h>0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+// Tick global qui met à jour l'affichage du timer sans re-render complet (préserve les inputs)
+let sessionTickInterval = null;
+function startSessionTick(){
+  if(sessionTickInterval) return;
+  sessionTickInterval = setInterval(()=>{
+    const el = document.getElementById('session-timer-display');
+    if(!el) return;
+    const start = parseInt(el.dataset.start);
+    const endRaw = el.dataset.end;
+    const end = endRaw ? parseInt(endRaw) : Date.now();
+    if(!start) return;
+    el.textContent = formatSessionDuration({ sessionStart:start, sessionEnd: endRaw?end:null });
+  }, 1000);
+}
+function stopSessionTick(){
+  if(sessionTickInterval){ clearInterval(sessionTickInterval); sessionTickInterval=null; }
 }
 
 // Récupère (ou initialise) le tableau de séries d'un exercice musculaire
@@ -1415,9 +1555,13 @@ function getSets(d, exIdx, nbSets) {
     const prev = d.sets[exIdx] || [];
     const arr=[];
     for(let s=0;s<nbSets;s++){
-      arr.push(prev[s] || { done:false, reps:'', weight:'' });
+      const old = prev[s];
+      arr.push(old ? { done:old.done||false, reps:old.reps||'', weight:old.weight||'', bands: old.bands||'' } : { done:false, reps:'', weight:'', bands:'' });
     }
     d.sets[exIdx]=arr;
+  } else {
+    // S'assure que les séries existantes ont bien le champ bands (migration douce)
+    d.sets[exIdx].forEach(s=>{ if(s.bands===undefined) s.bands=''; });
   }
   return d.sets[exIdx];
 }
@@ -1451,6 +1595,157 @@ function lastWeightFor(exName, beforeIdx) {
     }
   }
   return null;
+}
+// Pour les exos assistés : dernier nombre d'élastiques utilisé (min = moins d'aide = mieux)
+function lastBandsFor(exName, beforeIdx) {
+  for(let i=beforeIdx-1;i>=0;i--){
+    const d=state.days['d'+i];
+    if(!d||!d.sets) continue;
+    const sess=sessionForDay(i);
+    if(!sess) continue;
+    for(let j=0;j<sess.exercises.length;j++){
+      if(sess.exercises[j].name===exName && d.sets[j]){
+        let minB=null;
+        d.sets[j].forEach(s=>{
+          if(s.bands===''||s.bands==null) return;
+          const b=parseInt(s.bands);
+          if(!isNaN(b) && (minB===null || b<minB)) minB=b;
+        });
+        if(minB!==null) return minB;
+      }
+    }
+  }
+  return null;
+}
+
+// === HISTORIQUE D'UN EXO (pour le tableau + courbe de progression) ===
+// Retourne la liste des séances qui contiennent cet exo, avec poids max ou nombre min d'élastiques + reps max.
+function exerciseHistory(exName){
+  const out=[];
+  for(let i=0;i<TOTAL_DAYS;i++){
+    const d=state.days['d'+i];
+    if(!d||!d.sets) continue;
+    const sess=sessionForDay(i);
+    if(!sess) continue;
+    for(let j=0;j<sess.exercises.length;j++){
+      if(sess.exercises[j].name===exName && d.sets[j] && Array.isArray(d.sets[j])){
+        let maxW=null, minB=null, maxR=null;
+        let anyDone=false;
+        d.sets[j].forEach(s=>{
+          if(s.done) anyDone=true;
+          const w=parseFloat(s.weight);
+          if(!isNaN(w) && (maxW===null||w>maxW)) maxW=w;
+          if(s.bands!==''&&s.bands!=null){
+            const b=parseInt(s.bands);
+            if(!isNaN(b) && (minB===null||b<minB)) minB=b;
+          }
+          const r=parseInt(s.reps);
+          if(!isNaN(r) && (maxR===null||r>maxR)) maxR=r;
+        });
+        // On garde une entrée si au moins une série est cochée OU une valeur saisie
+        if(anyDone || maxW!==null || minB!==null || maxR!==null){
+          out.push({ idx:i, date:dateForDay(i), maxW, minB, maxR });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// Overlay plein écran : tableau + courbe de progression pour un exo
+let progressionOverlayOpen=false;
+function openProgressionOverlay(exName, exMode){
+  // exMode = 'weighted' | 'assisted'
+  closeProgressionOverlay();
+  progressionOverlayOpen=true;
+  const data=exerciseHistory(exName);
+  const ov=document.createElement('div');
+  ov.id='progression-overlay';
+  ov.className='hold-timer-overlay';
+  ov.innerHTML = renderProgressionContent(exName, exMode, data);
+  document.body.appendChild(ov);
+  ov.querySelector('[data-action="prog-close"]').addEventListener('click', closeProgressionOverlay);
+}
+function closeProgressionOverlay(){
+  const ov=document.getElementById('progression-overlay');
+  if(ov) ov.remove();
+  progressionOverlayOpen=false;
+}
+function renderProgressionContent(exName, exMode, data){
+  const isAssisted = exMode==='assisted';
+  const valLabel = isAssisted?'Élastiques (min)':'Poids max';
+  const unit = isAssisted?'':'kg';
+  const arrow = isAssisted?'(moins = mieux)':'(plus = mieux)';
+  const usableData = data.filter(d=>isAssisted? d.minB!=null : d.maxW!=null);
+  const tableRows = data.length===0
+    ? `<tr><td colspan="3" class="prog-empty">Aucune donnée saisie pour cet exo. Note tes premiers poids/élastiques en séance et reviens voir ta courbe.</td></tr>`
+    : data.map(d=>{
+        const val = isAssisted ? (d.minB!=null?d.minB:'—') : (d.maxW!=null?d.maxW+' kg':'—');
+        const reps = d.maxR!=null?d.maxR:'—';
+        const dlabel = d.date.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+        return `<tr><td>${dlabel}</td><td class="prog-val">${val}</td><td>${reps}</td></tr>`;
+      }).join('');
+  return `
+    <div class="prog-overlay-inner">
+      <div class="prog-head">
+        <div>
+          <div class="prog-title">${exName}</div>
+          <div class="prog-sub">PROGRESSION ${arrow}</div>
+        </div>
+        <button class="prog-close" data-action="prog-close">✕</button>
+      </div>
+      <div class="prog-chart-wrap">${renderProgressionChart(usableData, isAssisted)}</div>
+      <div class="prog-table-wrap">
+        <table class="prog-table">
+          <thead><tr><th>Date</th><th>${valLabel}</th><th>Reps max</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+// Courbe SVG simple : ligne + points
+function renderProgressionChart(data, isAssisted){
+  if(data.length===0){
+    return `<div class="prog-chart-empty">Pas encore de données.<br/>La courbe apparaîtra quand tu auras saisi des séances.</div>`;
+  }
+  const W=300, H=160, padL=36, padR=14, padT=14, padB=28;
+  const vals = data.map(d=>isAssisted?d.minB:d.maxW);
+  let vMin=Math.min(...vals), vMax=Math.max(...vals);
+  if(vMin===vMax){ vMin-=1; vMax+=1; }
+  // Pour assisted on inverse l'axe Y (moins en haut = mieux en haut)
+  const yFor=(v)=>{
+    const t=(v-vMin)/(vMax-vMin); // 0..1
+    const yt = isAssisted ? t : (1-t); // weighted: max en haut. assisted: min en haut.
+    return padT + yt*(H-padT-padB);
+  };
+  const xFor=(i)=>padL + (data.length===1?0:(i/(data.length-1))*(W-padL-padR));
+  // Lignes de grille (min, max, mid)
+  const yMid = (vMin+vMax)/2;
+  const gridLines = [vMin, yMid, vMax].map(v=>{
+    const y=yFor(v);
+    const lbl = isAssisted ? v.toString() : v.toFixed(0)+'kg';
+    return `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 3"/><text x="${padL-6}" y="${y+3}" text-anchor="end" font-size="9" font-family="monospace" fill="var(--ink-faint)">${lbl}</text>`;
+  }).join('');
+  // Polyline
+  const pts = data.map((d,i)=>{
+    const v = isAssisted?d.minB:d.maxW;
+    return xFor(i)+','+yFor(v);
+  }).join(' ');
+  const dots = data.map((d,i)=>{
+    const v = isAssisted?d.minB:d.maxW;
+    return `<circle cx="${xFor(i)}" cy="${yFor(v)}" r="4" fill="var(--accent)" stroke="var(--bg)" stroke-width="2"/>`;
+  }).join('');
+  // Labels X = J1, J2... (numéro de séance avec cet exo)
+  const xLabels = data.map((d,i)=>{
+    return `<text x="${xFor(i)}" y="${H-8}" text-anchor="middle" font-size="9" font-family="monospace" fill="var(--ink-faint)">S${i+1}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" class="prog-chart">
+    ${gridLines}
+    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 4px var(--accent));"/>
+    ${dots}
+    ${xLabels}
+  </svg>`;
 }
 
 function computeStats() {
@@ -1491,12 +1786,13 @@ function validateSession(idx) {
   const d=getDay(idx);
   const sess=sessionForCard(idx);
   if(!sess || d.validated) return;
-  // Compte les exos finis pour ajuster le bonus XP proportionnellement
   let done=0;
   sess.exercises.forEach((ex,i)=>{ if(exDone(d,ex,i)) done++; });
   const ratio = sess.exercises.length>0 ? done/sess.exercises.length : 0;
   const xpGain = Math.max(10, Math.round(sess.xp * ratio));
   d.validated=true;
+  // Fige la durée de séance
+  if(d.sessionStart && !d.sessionEnd) d.sessionEnd = Date.now();
   if(idx<900) awardXP(xpGain, 'SÉANCE '+sess.name+(done<sess.exercises.length?' (partielle)':''));
   if(navigator.vibrate) navigator.vibrate([100,50,100,50,200]);
   saveProfile();
@@ -1684,6 +1980,11 @@ function render() {
     <div class="view-content">${content}</div>
   `;
   attachListeners();
+  // Active le tick si un timer de séance est affiché et non terminé
+  if(document.getElementById('session-timer-display')){
+    const endRaw=document.getElementById('session-timer-display').dataset.end;
+    if(!endRaw) startSessionTick(); else stopSessionTick();
+  } else { stopSessionTick(); }
 }
 
 function renderPreviewBar(){
@@ -1735,6 +2036,15 @@ function renderTestCatalogue(){
     <div class="catalogue-session">
       <div class="catalogue-header"><span class="catalogue-tag stretch">YOGA</span><span class="catalogue-name">Routine 15 min</span><span class="catalogue-sub">Détente & mobilité</span></div>
       ${renderRoutineList(YOGA,'yoga',yogaSandbox,ydd.yoga)}
+    </div>
+  `;
+  // Abdos
+  const abdoSandbox=952;
+  const add=getDay(abdoSandbox);
+  html+=`
+    <div class="catalogue-session">
+      <div class="catalogue-header"><span class="catalogue-tag stretch">ABDOS</span><span class="catalogue-name">Routine sangle abdominale</span><span class="catalogue-sub">Sur jours d'étirement</span></div>
+      ${ABDOS.map((ex,i)=>renderAbdoCard(ex,i,add,abdoSandbox)).join('')}
     </div>
   `;
   return html;
@@ -1845,6 +2155,9 @@ function renderRestDay(idx, dayLabel, date, weekNum, phase, isOff) {
   const dd=getDay(idx);
   const stretchDone=Object.values(dd.stretches||{}).filter(Boolean).length;
   const yogaDone=Object.values(dd.yoga||{}).filter(Boolean).length;
+  // Compte les abdos finis (un exo fini = toutes ses séries cochées)
+  let abdosDone=0;
+  ABDOS.forEach((ex,i)=>{ if(abdoExDone(dd,ex,i)) abdosDone++; });
   // Jour de repos total (mercredi) : rien à faire, on l'affiche clairement.
   if(isOff){
     return `
@@ -1872,12 +2185,14 @@ function renderRestDay(idx, dayLabel, date, weekNum, phase, isOff) {
     </div>
     <div class="phase-note" style="padding:11px 14px;margin-bottom:18px;background:var(--bg-2);border:1px solid var(--border);border-left:2px solid var(--amber);">
       <div style="font-size:9px;letter-spacing:0.2em;color:var(--amber);text-transform:uppercase;margin-bottom:3px;font-weight:700;">${phase.label}</div>
-      <div style="font-size:11px;color:var(--ink-dim);line-height:1.6;">Pas de sport, mais 10 min d'étirements ou de yoga te font gagner en souplesse et préviennent les blessures.</div>
+      <div style="font-size:11px;color:var(--ink-dim);line-height:1.6;">Programme du jour : étirements pour la souplesse, abdos pour le ventre, yoga pour finir en détente. Fais ce que tu peux, note ce que tu fais.</div>
     </div>
     <div class="section-label">Programme du jour <span class="count">+XP</span></div>
-    <button class="collapse-btn ${openSections.stretches?'open':''}" data-toggle="stretches"><span>Étirements (${stretchDone}/${STRETCHES.length}) · +15 XP</span><span class="arrow">▸</span></button>
+    <button class="collapse-btn ${openSections.stretches?'open':''}" data-toggle="stretches"><span>1. Étirements (${stretchDone}/${STRETCHES.length}) · +15 XP</span><span class="arrow">▸</span></button>
     ${openSections.stretches?`<div class="collapse-body">${renderRoutineList(STRETCHES,'stretch',idx,dd.stretches)}</div>`:''}
-    <button class="collapse-btn ${openSections.yoga?'open':''}" data-toggle="yoga"><span>Yoga 15 min (${yogaDone}/${YOGA.length}) · +20 XP</span><span class="arrow">▸</span></button>
+    <button class="collapse-btn ${openSections.abdos?'open':''}" data-toggle="abdos"><span>2. Abdos (${abdosDone}/${ABDOS.length}) · +XP par série</span><span class="arrow">▸</span></button>
+    ${openSections.abdos?`<div class="collapse-body">${ABDOS.map((ex,i)=>renderAbdoCard(ex,i,dd,idx)).join('')}</div>`:''}
+    <button class="collapse-btn ${openSections.yoga?'open':''}" data-toggle="yoga"><span>3. Yoga 15 min (${yogaDone}/${YOGA.length}) · +20 XP</span><span class="arrow">▸</span></button>
     ${openSections.yoga?`<div class="collapse-body">${renderRoutineList(YOGA,'yoga',idx,dd.yoga)}</div>`:''}
     ${renderVitals(idx, dd)}
   `;
@@ -1892,6 +2207,66 @@ function nextTrainLabel(fromIdx){
     }
   }
   return '—';
+}
+
+// Carte d'un exercice (cardio step ou muscu avec séries), telle qu'affichée en daily.
+// === ABDOS : helpers et rendu ===
+// Storage séparé : d.abdoSets[i] = [{done, reps}, ...]
+function getAbdoSets(d, i, nbSets){
+  if(!d.abdoSets) d.abdoSets={};
+  if(!d.abdoSets[i] || d.abdoSets[i].length!==nbSets){
+    const prev = d.abdoSets[i] || [];
+    const arr=[];
+    for(let s=0;s<nbSets;s++){
+      const old=prev[s];
+      arr.push(old ? { done:old.done||false, reps:old.reps||'' } : { done:false, reps:'' });
+    }
+    d.abdoSets[i]=arr;
+  }
+  return d.abdoSets[i];
+}
+function abdoExDone(d, ex, i){
+  if(!ex.sets) return false;
+  const arr=getAbdoSets(d, i, ex.sets);
+  return arr.every(s=>s.done);
+}
+// Rendu d'un exo abdo : 1 illustration + 1 bouton démo + séries cochables avec champ reps
+function renderAbdoCard(ex, i, dd, idx){
+  const isDone=abdoExDone(dd, ex, i);
+  const arr=getAbdoSets(dd, i, ex.sets);
+  const setsHtml=`
+    <div class="sets">
+      <div class="set-head"><span></span><span>Reps faites</span><span>Objectif</span><span>OK</span></div>
+      ${arr.map((s,si)=>`
+        <div class="set-row ${s.done?'done':''}">
+          <div class="set-idx">S${si+1}</div>
+          <input class="set-input" type="text" inputmode="text" placeholder="—" value="${s.reps||''}" data-action="abdo-set-reps" data-day="${idx}" data-ex="${i}" data-set="${si}" />
+          <input class="set-input cardio-na" value="${ex.reps}" disabled />
+          <div class="set-check" data-action="abdo-set-toggle" data-day="${idx}" data-ex="${i}" data-set="${si}"></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  return `
+    <div class="exo ${isDone?'done':''}">
+      <div class="exo-head">
+        <div class="exo-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="exo-info">
+          <div class="exo-name">${ex.name}</div>
+          <div class="exo-meta"><span class="exo-tag libre">ABDOS</span><span class="exo-prescription">${ex.sets} séries × ${ex.reps}</span></div>
+        </div>
+        <div class="exo-xp">+${ex.xp}</div>
+      </div>
+      ${ex.tip?`<div class="exo-tip">${ex.tip}</div>`:''}
+      <div class="exo-viz">
+        <div class="exo-viz-svg">${vizSVG(ex.viz)}</div>
+        <div class="exo-viz-actions">
+          <a class="exo-act-btn video" href="${videoURL(ex)}" target="_blank" rel="noopener"><span class="ic">${IC_PLAY}</span><span class="lbl">Voir la démo vidéo</span><span class="arr">↗</span></a>
+        </div>
+      </div>
+      ${setsHtml}
+    </div>
+  `;
 }
 
 // Carte d'un exercice (cardio step ou muscu avec séries), telle qu'affichée en daily.
@@ -1924,19 +2299,31 @@ function renderExerciseCard(ex, i, dd, idx){
   if(ex.sets){
     const arr=getSets(dd, i, ex.sets);
     const showWeight = ex.weighted;
+    const showBands = ex.assisted;
+    let colLabel;
+    if(showWeight) colLabel='Poids (kg)';
+    else if(showBands) colLabel='Élastiques';
+    else colLabel='—';
     setsHtml=`
       <div class="sets">
-        <div class="set-head"><span></span><span>Reps</span><span>${showWeight?'Poids (kg)':'—'}</span><span>OK</span></div>
-        ${arr.map((s,si)=>`
+        <div class="set-head"><span></span><span>Reps</span><span>${colLabel}</span><span>OK</span></div>
+        ${arr.map((s,si)=>{
+          let middleInput;
+          if(showWeight){
+            middleInput = `<input class="set-input" type="number" inputmode="decimal" step="0.5" placeholder="0" value="${s.weight}" data-action="set-weight" data-day="${idx}" data-ex="${i}" data-set="${si}" />`;
+          } else if(showBands){
+            middleInput = `<input class="set-input" type="number" inputmode="numeric" min="0" max="9" placeholder="0" value="${s.bands||''}" data-action="set-bands" data-day="${idx}" data-ex="${i}" data-set="${si}" title="Nombre d'élastiques d'assistance (0 = sans aide)" />`;
+          } else {
+            middleInput = `<input class="set-input cardio-na" value="poids du corps" disabled />`;
+          }
+          return `
           <div class="set-row ${s.done?'done':''}">
             <div class="set-idx">S${si+1}</div>
             <input class="set-input" type="number" inputmode="numeric" placeholder="${ex.reps.replace(/[^0-9]/g,'')||'—'}" value="${s.reps}" data-action="set-reps" data-day="${idx}" data-ex="${i}" data-set="${si}" />
-            ${showWeight
-              ? `<input class="set-input" type="number" inputmode="decimal" step="0.5" placeholder="0" value="${s.weight}" data-action="set-weight" data-day="${idx}" data-ex="${i}" data-set="${si}" />`
-              : `<input class="set-input cardio-na" value="poids du corps" disabled />`}
+            ${middleInput}
             <div class="set-check" data-action="set-toggle" data-day="${idx}" data-ex="${i}" data-set="${si}"></div>
           </div>
-        `).join('')}
+        `;}).join('')}
       </div>
     `;
   }
@@ -1958,7 +2345,28 @@ function renderExerciseCard(ex, i, dd, idx){
     } else {
       prevHtml=`<div class="exo-prev">Première fois sur cet exo — note la charge que tu utilises</div>`;
     }
+  } else if(ex.assisted){
+    const prevB=lastBandsFor(ex.name, idx);
+    const arr=getSets(dd,i,ex.sets);
+    let curMin=null; arr.forEach(s=>{ if(s.bands===''||s.bands==null) return; const b=parseInt(s.bands); if(!isNaN(b)&&(curMin===null||b<curMin))curMin=b; });
+    if(prevB!=null){
+      if(curMin!=null){
+        const diff=curMin-prevB;
+        if(diff<0) prevHtml=`<div class="exo-prev"><span class="up">↑ ${-diff} élastique${-diff>1?'s':''} en moins vs dernière fois (${prevB})</span></div>`;
+        else if(diff>0) prevHtml=`<div class="exo-prev"><span class="down">↓ ${diff} élastique${diff>1?'s':''} en plus vs dernière fois (${prevB})</span></div>`;
+        else prevHtml=`<div class="exo-prev"><span class="same">= même assistance que la dernière fois (${prevB} élastique${prevB>1?'s':''})</span></div>`;
+      } else {
+        prevHtml=`<div class="exo-prev">Dernière séance : <strong>${prevB} élastique${prevB>1?'s':''}</strong> — vise moins d\'aide (progression)</div>`;
+      }
+    } else {
+      prevHtml=`<div class="exo-prev">Première fois — note le nombre d\'élastiques (0 si sans aide). L\'objectif est d\'en utiliser de moins en moins.</div>`;
+    }
   }
+
+  // Bouton "Voir progression" pour les exos qui ont des données quantifiables
+  const showProgBtn = (ex.weighted || ex.assisted) && idx<900;
+  const progMode = ex.assisted ? 'assisted' : 'weighted';
+  const progBtn = showProgBtn ? `<button class="exo-prog-btn" data-action="show-prog" data-ex-name="${ex.name.replace(/"/g,'&quot;')}" data-ex-mode="${progMode}"><span>📊</span> Voir ma progression</button>` : '';
 
   return `
     <div class="exo ${isDone?'done':''}">
@@ -1974,6 +2382,7 @@ function renderExerciseCard(ex, i, dd, idx){
       ${vizBlock(ex)}
       ${prevHtml}
       ${setsHtml}
+      ${progBtn}
     </div>
   `;
 }
@@ -1986,6 +2395,15 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
   sess.exercises.forEach((ex,i)=>{ if(exDone(dd,ex,i)) done++; });
   const stretchDone=Object.values(dd.stretches||{}).filter(Boolean).length;
 
+  // Timer de séance : démarre auto au 1er cochage, fige à la validation.
+  const showTimer = dd.sessionStart && idx<900;
+  const timerBlock = showTimer ? `
+    <div class="session-timer ${dd.validated?'done':'running'}" id="session-timer-block">
+      <span class="session-timer-label">${dd.validated?'DURÉE FINALE':'EN COURS'}</span>
+      <span class="session-timer-value" id="session-timer-display" data-start="${dd.sessionStart}" data-end="${dd.sessionEnd||''}">${formatSessionDuration(dd)}</span>
+    </div>
+  `:'';
+
   let html=`
     <div class="banner">
       <span class="banner-corner tl"></span><span class="banner-corner tr"></span><span class="banner-corner bl"></span><span class="banner-corner br"></span>
@@ -1995,6 +2413,7 @@ function renderTrainDay(idx, dayLabel, date, weekNum, phase) {
       <div class="banner-reward">+${sess.xp} XP</div>
       <div class="banner-meta">${done}/${total} terminé</div>
     </div>
+    ${timerBlock}
     <div class="phase-note" style="padding:11px 14px;margin-bottom:18px;background:var(--bg-2);border:1px solid var(--border);border-left:2px solid var(--amber);">
       <div style="font-size:9px;letter-spacing:0.2em;color:var(--amber);text-transform:uppercase;margin-bottom:3px;font-weight:700;">${phase.label}</div>
       <div style="font-size:11px;color:var(--ink-dim);line-height:1.6;">${phase.tip}</div>
@@ -2440,6 +2859,10 @@ function attachListeners() {
     const was=arr[si].done;
     arr[si].done=!was;
     if(sandbox){ saveProfile(); render(); return; } // test : pas d'XP
+    // Démarre le timer de séance au tout premier cochage du jour
+    if(!was && !d.sessionStart && !d.validated){
+      d.sessionStart = Date.now();
+    }
     const perSet=Math.max(1, Math.round(ex.xp/ex.sets));
     awardXP(was ? -perSet : perSet);
     if(was && d.validated){ d.validated=false; awardXP(-sess.xp,'Séance annulée'); }
@@ -2463,6 +2886,43 @@ function attachListeners() {
       const d=getDay(idx); const sess=sessionForCard(idx); const ex=sess.exercises[exi];
       const arr=getSets(d, exi, ex.sets);
       arr[si].weight=e.target.value; saveProfile(); render(); // render pour MAJ le rappel de charge
+    });
+  });
+  // Saisie nombre d'élastiques (exos assistés : tractions, dips)
+  document.querySelectorAll('[data-action="set-bands"]').forEach(el=>{
+    el.addEventListener('click',(e)=>e.stopPropagation());
+    el.addEventListener('change',(e)=>{
+      const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
+      const d=getDay(idx); const sess=sessionForCard(idx); const ex=sess.exercises[exi];
+      const arr=getSets(d, exi, ex.sets);
+      arr[si].bands=e.target.value; saveProfile(); render();
+    });
+  });
+  // Bouton "Voir ma progression"
+  document.querySelectorAll('[data-action="show-prog"]').forEach(el=>el.addEventListener('click',()=>{
+    openProgressionOverlay(el.dataset.exName, el.dataset.exMode);
+  }));
+  // ABDOS : cocher une série (XP par série, comme muscu)
+  document.querySelectorAll('[data-action="abdo-set-toggle"]').forEach(el=>el.addEventListener('click',()=>{
+    const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
+    const sandbox = idx>=900;
+    const d=getDay(idx); const ex=ABDOS[exi]; if(!ex) return;
+    const arr=getAbdoSets(d, exi, ex.sets);
+    const was=arr[si].done;
+    arr[si].done=!was;
+    if(sandbox){ saveProfile(); render(); return; }
+    const perSet=Math.max(1, Math.round(ex.xp/ex.sets));
+    awardXP(was ? -perSet : perSet);
+    saveProfile(); render();
+  }));
+  // ABDOS : saisie reps faites
+  document.querySelectorAll('[data-action="abdo-set-reps"]').forEach(el=>{
+    el.addEventListener('click',(e)=>e.stopPropagation());
+    el.addEventListener('change',(e)=>{
+      const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
+      const d=getDay(idx); const ex=ABDOS[exi]; if(!ex) return;
+      const arr=getAbdoSets(d, exi, ex.sets);
+      arr[si].reps=e.target.value; saveProfile();
     });
   });
 
