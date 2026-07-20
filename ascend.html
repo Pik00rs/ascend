@@ -499,6 +499,28 @@ body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:
 .btn:hover { border-color:var(--accent); box-shadow:0 0 12px rgba(5,242,219,0.15); }
 .btn:active { transform:scale(0.98); }
 .btn-danger { color:var(--bad); border-color:rgba(255,56,96,0.3); }
+.btn-export { color:var(--accent); border-color:var(--accent-dim); }
+.btn-export:hover { background:rgba(5,242,219,0.06); }
+/* Overlay export */
+.export-opt { display:flex; gap:12px; align-items:flex-start; padding:13px; margin-bottom:8px; background:var(--bg-3); border:1px solid var(--border-bright); border-radius:8px; cursor:pointer; transition:all 0.15s; }
+.export-opt:hover { border-color:var(--accent); background:var(--bg); }
+.export-opt:active { transform:scale(0.99); }
+.export-opt.import { border-color:var(--magenta-dim); }
+.export-opt.import:hover { border-color:var(--magenta); }
+.export-opt-icon { font-size:20px; flex-shrink:0; line-height:1.2; }
+.export-opt-name { font-size:13px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+.export-opt-desc { font-size:11px; color:var(--ink-dim); line-height:1.5; }
+.export-sep { font-size:9px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ink-faint); font-weight:700; margin:16px 0 8px; padding-top:12px; border-top:1px solid var(--border); }
+.export-ok { padding:10px 12px; margin:12px 0 8px; background:rgba(0,255,156,0.08); border:1px solid var(--ok); border-radius:6px; font-size:11px; color:var(--ok); line-height:1.5; word-break:break-all; }
+.export-textwrap { margin-top:12px; }
+.export-textlabel { font-size:10px; color:var(--ink-faint); line-height:1.5; margin-bottom:6px; }
+.export-text { width:100%; height:150px; padding:10px; background:var(--bg); border:1px solid var(--border-bright); border-radius:6px; color:var(--ink-dim); font-family:'JetBrains Mono',monospace; font-size:10px; line-height:1.5; resize:vertical; box-sizing:border-box; }
+.export-text:focus { outline:none; border-color:var(--accent); }
+.export-copy { width:100%; margin-top:8px; padding:12px; background:var(--bg-3); border:1px solid var(--accent-dim); color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700; cursor:pointer; border-radius:6px; }
+.export-copy:active { transform:scale(0.98); }
+.export-copy.import-btn { border-color:var(--magenta); color:var(--magenta); }
+.export-warn { margin-top:8px; font-size:10px; color:var(--amber); line-height:1.5; text-align:center; }
+.export-warn.err { color:var(--bad); }
 
 /* COUNTDOWN */
 .countdown { text-align:center; padding:32px 20px; margin-bottom:18px; background:var(--bg-2); border:1px solid var(--accent-dim); }
@@ -570,7 +592,7 @@ input:focus { outline:none; }
 // >>> NUMÉRO DE VERSION <<<
 // À INCRÉMENTER À CHAQUE FOIS QUE TU DÉPLOIES UNE NOUVELLE VERSION SUR GITHUB.
 // L'app compare ce numéro à celui de version.json et propose la mise à jour.
-const APP_VERSION = 20;
+const APP_VERSION = 21;
 
 const TOTAL_DAYS = 42;
 const STORE_PREFIX = 'ascend_v1_';
@@ -1748,6 +1770,264 @@ function renderProgressionChart(data, isAssisted){
   </svg>`;
 }
 
+// ============================================================
+// EXPORT / IMPORT DES RÉSULTATS
+// ============================================================
+// Deux formats :
+//  - JSON : sauvegarde complète, réimportable (changement de téléphone)
+//  - CSV  : tableau de résultats à ouvrir dans Excel / Google Sheets
+function exportFileStamp(){
+  const d=new Date();
+  const p=(n)=>String(n).padStart(2,'0');
+  return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes());
+}
+function exportProfileLabel(){
+  const p=getProfile();
+  return (p&&p.name?p.name:activeProfile).replace(/[^a-zA-Z0-9À-ÿ]+/g,'-');
+}
+
+// Sauvegarde complète du profil actif (réimportable)
+function buildExportJSON(){
+  const p=getProfile();
+  const payload={
+    app:'ASCEND',
+    version:APP_VERSION,
+    exportedAt:new Date().toISOString(),
+    profileId:activeProfile,
+    profileName:p?p.name:activeProfile,
+    data:state
+  };
+  return JSON.stringify(payload,null,2);
+}
+
+// Tableau de résultats : une ligne par série effectuée
+function buildExportCSV(){
+  const rows=[['Date','Jour','Seance','Exercice','Serie','Reps','Poids_kg','Elastiques','Fait','Duree_seance']];
+  const esc=(v)=>{
+    const s=(v===null||v===undefined)?'':String(v);
+    return /[";\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+  };
+  for(let i=0;i<TOTAL_DAYS;i++){
+    const d=state.days['d'+i];
+    if(!d) continue;
+    const dateStr=dateForDay(i).toLocaleDateString('fr-FR');
+    const wd=WEEKDAY_FR[weekdayForDay(i)];
+    const dur=d.sessionStart? formatSessionDuration(d) : '';
+    // Séances de sport
+    const sess=sessionForDay(i);
+    if(sess && d.sets){
+      sess.exercises.forEach((ex,exi)=>{
+        const arr=d.sets[exi];
+        if(!Array.isArray(arr)) return;
+        arr.forEach((s,si)=>{
+          if(!s.done && !s.reps && !s.weight && !s.bands) return;
+          rows.push([dateStr,wd,sess.name,ex.name,'S'+(si+1),s.reps||'',s.weight||'',s.bands||'',s.done?'oui':'non',dur]);
+        });
+      });
+    }
+    // Abdos (jours d'étirement)
+    if(d.abdoSets){
+      ABDOS.forEach((ex,exi)=>{
+        const arr=d.abdoSets[exi];
+        if(!Array.isArray(arr)) return;
+        arr.forEach((s,si)=>{
+          if(!s.done && !s.reps) return;
+          rows.push([dateStr,wd,'ABDOS',ex.name,'S'+(si+1),s.reps||'',' ',' ',s.done?'oui':'non','']);
+        });
+      });
+    }
+  }
+  // Point-virgule : Excel FR ouvre directement en colonnes
+  return rows.map(r=>r.map(esc).join(';')).join('\n');
+}
+
+// Résumé lisible (pour partager vite fait)
+function buildExportSummary(){
+  const st=computeStats();
+  const p=getProfile();
+  const lines=[];
+  lines.push('ASCEND — '+(p?p.name:activeProfile));
+  lines.push('Export du '+new Date().toLocaleDateString('fr-FR'));
+  lines.push('');
+  lines.push('Niveau '+st.level+' · '+st.xp+' XP');
+  lines.push('Séances validées : '+st.totalWorkouts);
+  lines.push('Série en cours : '+st.currentStreak+' · record : '+st.maxStreak);
+  lines.push('Nuits ≥7h : '+st.sleepDays);
+  lines.push('Badges : '+state.unlockedBadges.length+'/'+BADGES.length);
+  lines.push('');
+  lines.push('— Charges max par exercice —');
+  const seen={};
+  getProfile().sessions.forEach(sess=>{
+    sess.exercises.forEach(ex=>{
+      if(seen[ex.name]) return;
+      seen[ex.name]=true;
+      const hist=exerciseHistory(ex.name);
+      if(hist.length===0) return;
+      let best=null;
+      hist.forEach(h=>{ if(h.maxW!=null && (best===null||h.maxW>best)) best=h.maxW; });
+      if(best!==null) lines.push(ex.name+' : '+best+' kg');
+    });
+  });
+  return lines.join('\n');
+}
+
+// Téléchargement d'un fichier généré en mémoire
+function downloadFile(filename, content, mime){
+  try{
+    const blob=new Blob([content],{type:mime+';charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1500);
+    return true;
+  }catch(e){ return false; }
+}
+
+// Overlay d'export
+function openExportOverlay(){
+  closeExportOverlay();
+  const ov=document.createElement('div');
+  ov.id='export-overlay';
+  ov.className='hold-timer-overlay';
+  ov.innerHTML=`
+    <div class="prog-overlay-inner">
+      <div class="prog-head">
+        <div>
+          <div class="prog-title">Extraire mes résultats</div>
+          <div class="prog-sub">PROFIL ${exportProfileLabel().toUpperCase()}</div>
+        </div>
+        <button class="prog-close" data-action="export-close">✕</button>
+      </div>
+
+      <div class="export-opt" data-action="export-csv">
+        <div class="export-opt-icon">📊</div>
+        <div class="export-opt-body">
+          <div class="export-opt-name">Tableau de résultats (CSV)</div>
+          <div class="export-opt-desc">Toutes tes séries : date, exercice, reps, poids. S'ouvre dans Excel ou Google Sheets.</div>
+        </div>
+      </div>
+
+      <div class="export-opt" data-action="export-json">
+        <div class="export-opt-icon">💾</div>
+        <div class="export-opt-body">
+          <div class="export-opt-name">Sauvegarde complète (JSON)</div>
+          <div class="export-opt-desc">Ta progression entière. À garder pour restaurer sur un autre téléphone.</div>
+        </div>
+      </div>
+
+      <div class="export-opt" data-action="export-summary">
+        <div class="export-opt-icon">📋</div>
+        <div class="export-opt-body">
+          <div class="export-opt-name">Résumé texte</div>
+          <div class="export-opt-desc">Niveau, séances, charges max. Affiché à l'écran pour copier-coller.</div>
+        </div>
+      </div>
+
+      <div class="export-sep">Restaurer</div>
+      <div class="export-opt import" data-action="import-json">
+        <div class="export-opt-icon">📥</div>
+        <div class="export-opt-body">
+          <div class="export-opt-name">Importer une sauvegarde</div>
+          <div class="export-opt-desc">Colle un fichier JSON exporté pour remplacer la progression de ce profil.</div>
+        </div>
+      </div>
+
+      <div id="export-result"></div>
+    </div>
+  `;
+  document.body.appendChild(ov);
+  ov.querySelector('[data-action="export-close"]').addEventListener('click', closeExportOverlay);
+  ov.querySelector('[data-action="export-csv"]').addEventListener('click',()=>{
+    const csv=buildExportCSV();
+    const name='ascend-'+exportProfileLabel()+'-'+exportFileStamp()+'.csv';
+    const ok=downloadFile(name, '\ufeff'+csv, 'text/csv');
+    showExportResult(ok? 'Fichier téléchargé : '+name : null, csv, 'CSV');
+  });
+  ov.querySelector('[data-action="export-json"]').addEventListener('click',()=>{
+    const json=buildExportJSON();
+    const name='ascend-'+exportProfileLabel()+'-'+exportFileStamp()+'.json';
+    const ok=downloadFile(name, json, 'application/json');
+    showExportResult(ok? 'Fichier téléchargé : '+name : null, json, 'JSON');
+  });
+  ov.querySelector('[data-action="export-summary"]').addEventListener('click',()=>{
+    showExportResult(null, buildExportSummary(), 'Résumé');
+  });
+  ov.querySelector('[data-action="import-json"]').addEventListener('click', showImportBox);
+}
+function closeExportOverlay(){
+  const ov=document.getElementById('export-overlay');
+  if(ov) ov.remove();
+}
+// Affiche le contenu dans une zone copiable (et le message de téléchargement si réussi)
+function showExportResult(okMsg, content, label){
+  const box=document.getElementById('export-result');
+  if(!box) return;
+  box.innerHTML=`
+    ${okMsg?`<div class="export-ok">✓ ${okMsg}</div>`:''}
+    <div class="export-textwrap">
+      <div class="export-textlabel">${label} — sélectionne tout et copie si le téléchargement ne marche pas</div>
+      <textarea class="export-text" readonly id="export-textarea">${content.replace(/</g,'&lt;')}</textarea>
+      <button class="export-copy" data-action="export-copy">Copier dans le presse-papier</button>
+    </div>
+  `;
+  const ta=document.getElementById('export-textarea');
+  const btn=box.querySelector('[data-action="export-copy"]');
+  if(btn) btn.addEventListener('click',()=>{
+    try{
+      ta.select(); ta.setSelectionRange(0, 999999);
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(content).then(()=>{ btn.textContent='Copié ✓'; setTimeout(()=>btn.textContent='Copier dans le presse-papier',1800); });
+      } else {
+        document.execCommand('copy'); btn.textContent='Copié ✓'; setTimeout(()=>btn.textContent='Copier dans le presse-papier',1800);
+      }
+    }catch(e){ btn.textContent='Copie impossible — sélectionne à la main'; }
+  });
+  box.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+// Zone d'import
+function showImportBox(){
+  const box=document.getElementById('export-result');
+  if(!box) return;
+  box.innerHTML=`
+    <div class="export-textwrap">
+      <div class="export-textlabel">Colle ici le contenu du fichier JSON exporté</div>
+      <textarea class="export-text" id="import-textarea" placeholder='{"app":"ASCEND", ...}'></textarea>
+      <button class="export-copy import-btn" data-action="do-import">Restaurer cette sauvegarde</button>
+      <div class="export-warn">Attention : ça remplace toute la progression du profil actif.</div>
+    </div>
+  `;
+  box.querySelector('[data-action="do-import"]').addEventListener('click',()=>{
+    const ta=document.getElementById('import-textarea');
+    const raw=(ta&&ta.value||'').trim();
+    if(!raw){ if(ta) ta.focus(); return; }
+    let parsed;
+    try{ parsed=JSON.parse(raw); }
+    catch(e){ showImportError('Le texte collé n\'est pas un JSON valide.'); return; }
+    const incoming = parsed && parsed.data ? parsed.data : parsed;
+    if(!incoming || typeof incoming!=='object' || !incoming.days){
+      showImportError('Cette sauvegarde ne contient pas de progression ASCEND.');
+      return;
+    }
+    if(!confirm('Remplacer toute la progression du profil actif par cette sauvegarde ?')) return;
+    state = incoming;
+    if(!state.days) state.days={};
+    if(state.xp===undefined) state.xp=0;
+    if(!state.unlockedBadges) state.unlockedBadges=[];
+    saveProfile();
+    closeExportOverlay();
+    render();
+    showToast('Sauvegarde restaurée', 'badge');
+  });
+}
+function showImportError(msg){
+  const box=document.getElementById('export-result');
+  if(!box) return;
+  const w=box.querySelector('.export-warn');
+  if(w){ w.textContent=msg; w.classList.add('err'); }
+}
+
 function computeStats() {
   const todayIdx=getDayIndex();
   let totalWorkouts=0, sleepDays=0, cardioCount=0;
@@ -2531,7 +2811,10 @@ function renderStats(todayIdx) {
       }).join('')}
     </div>
 
-    <button class="btn btn-danger" data-action="reset" style="margin-top:18px;">// RESET CE PROFIL</button>
+    <button class="btn btn-export" data-action="open-export" style="margin-top:18px;">↓ EXTRAIRE MES RÉSULTATS</button>
+    <p style="font-size:10px;color:var(--ink-faint);text-align:center;line-height:1.5;margin:2px 0 10px;">Tableau CSV, sauvegarde complète ou résumé texte.</p>
+
+    <button class="btn btn-danger" data-action="reset">// RESET CE PROFIL</button>
     <button class="btn btn-danger" data-action="reset-all">// RESET TOTAL · TOUS LES PROFILS</button>
     <p style="font-size:10px;color:var(--ink-faint);text-align:center;line-height:1.5;margin-top:2px;">Reset profil = efface ta progression seule.<br>Reset total = remet tout à zéro pour les 2 profils.</p>
   `;
@@ -2902,6 +3185,9 @@ function attachListeners() {
   document.querySelectorAll('[data-action="show-prog"]').forEach(el=>el.addEventListener('click',()=>{
     openProgressionOverlay(el.dataset.exName, el.dataset.exMode);
   }));
+  // Bouton "Extraire mes résultats"
+  const expBtn=document.querySelector('[data-action="open-export"]');
+  if(expBtn) expBtn.addEventListener('click', openExportOverlay);
   // ABDOS : cocher une série (XP par série, comme muscu)
   document.querySelectorAll('[data-action="abdo-set-toggle"]').forEach(el=>el.addEventListener('click',()=>{
     const idx=parseInt(el.dataset.day), exi=parseInt(el.dataset.ex), si=parseInt(el.dataset.set);
